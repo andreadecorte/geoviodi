@@ -23,6 +23,7 @@
 
 GpxWptType::GpxWptType()
 {
+    _ele = -10000;
 }
 
 double const GpxWptType::getEle()
@@ -131,3 +132,24 @@ void GpxWptType::setSym(QString sym)
 {
     _sym = sym;
 }
+
+QString const GpxWptType::getDesc()
+{
+    return _desc;
+}
+
+void GpxWptType::setDesc(QString desc)
+{
+    _desc = desc;
+}
+
+QString const GpxWptType::getType()
+{
+    return _type;
+}
+
+void GpxWptType::setType(QString type)
+{
+    _type = type;
+}
+

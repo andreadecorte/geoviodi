@@ -149,6 +149,18 @@ namespace XmlLoader
                         {
                             wpt->setTime(reader.readElementText());
                         }
+                        if (reader.name() == "ele")
+                        {
+                            wpt->setEle(reader.readElementText());
+                        }
+                        if (reader.name() == "desc")
+                        {
+                            wpt->setDesc(reader.readElementText());
+                        }
+                        if (reader.name() == "type")
+                        {
+                            wpt->setType(reader.readElementText());
+                        }
                         reader.readNext();
                     }
                     gpx->addWpt(wpt);

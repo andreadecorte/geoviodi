@@ -45,7 +45,7 @@ SOURCES += src/main.cpp \
     src/metadatadialog.cpp
 HEADERS += src/mainwindow.h \
     src/gpxlatitudetype.h \
-    src/longitudetype.h \
+    src/gpxlongitudetype.h \
     src/gpxlongitudetype.h \
     src/gpxdegreestype.h \
     src/gpxwpttype.h \

@@ -48,6 +48,10 @@ public:
     void setLatLon(QString lat, QString lon);
     QString const getSym();
     void setSym (QString sym);
+    QString const getDesc();
+    void setDesc (QString desc);
+    QString const getType();
+    void setType (QString type);
 
 private:
     double _ele;

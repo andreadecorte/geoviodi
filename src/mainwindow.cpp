@@ -140,6 +140,39 @@ void MainWindow::on_action_Open_triggered()
         {
             wptCurrentName = current->getName();
         }
+        else
+        {
+            wptCurrentName.append("No name");
+        }
+        wptCurrentName.append("???");
+        if (!current->getTime().isNull())
+            wptCurrentName.append(current->getTime().toString());
+        else
+        {
+            wptCurrentName.append("No");
+        }
+        wptCurrentName.append("???");
+        if (current->getEle() != -10000)
+            wptCurrentName.append(QString::number(current->getEle()));
+        else
+        {
+            wptCurrentName.append("No");
+        }
+        wptCurrentName.append("???");
+        if (!current->getDesc().isEmpty())
+            wptCurrentName.append(current->getDesc());
+        else
+        {
+            wptCurrentName.append("No");
+        }
+        wptCurrentName.append("???");
+        if (!current->getType().isEmpty())
+            wptCurrentName.append(current->getType());
+        else
+        {
+            wptCurrentName.append("No");
+        }
+
         geom->addGeometry(new CirclePoint(current->getLon()->getLongitude(), current->getLat()->getLatitude(), wptCurrentName, Point::Middle));
     }
 
@@ -321,10 +354,17 @@ void MainWindow::pointClicked(Geometry *geometry,QPoint)
     while (i.hasNext())
     {
         Point* current = i.next();
-        ui->lbl_Name->setText(current->name());
+
+        //populate info dock
+        QStringList list = current->name().split("???");
+        ui->lbl_Name->setText(list.at(0));
         ui->lbl_Type->setText(geometry->GeometryType);
         ui->lbl_X->setText(QString::number(current->longitude()));
         ui->lbl_Y->setText(QString::number(current->latitude()));
+        ui->lbl_Time->setText(list.at(1));
+        ui->lbl_Ele->setText(list.at(2));
+        ui->lbl_Desc->setText(list.at(3));
+        ui->lbl_Type->setText(list.at(4));
     }
 }
 
@@ -380,8 +420,9 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
                 }
                 QString wptName = "";
                 if (!currentWpt->getName().isNull())
+                {
                     wptName = currentWpt->getName();
-
+                }
                 points.append(new Point(currentWpt->getLon()->getLongitude(), currentWpt->getLat()->getLatitude(), wptName, Point::BottomLeft));
                 previousWpt = currentWpt;
             }
