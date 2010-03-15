@@ -70,7 +70,6 @@ private:
     Layer* l;
     Layer* geom;
     GpxType* gpxFile;
-    QMenu* mapMenu;
 
     QAction* osmAction;
     QAction* yahooActionMap;
@@ -81,6 +80,7 @@ private:
     void addZoomButtons();
 
 private slots:
+    void on_action_About_triggered();
     void on_action_Close_triggered();
     void on_action_Info_triggered();
     void on_action_Exit_triggered();

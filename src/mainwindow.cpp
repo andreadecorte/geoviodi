@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    connect(ui->actionAbout_Qt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
     gpxFile = NULL;
 
@@ -68,11 +69,10 @@ MainWindow::MainWindow(QWidget *parent) :
     osmAction->setChecked(true);
     connect(mapproviderGroup, SIGNAL(triggered(QAction*)),this, SLOT(mapproviderSelected(QAction*)));
 
-    mapMenu = ui->menuBar->addMenu(tr("&Map Provider"));
-    mapMenu->addAction(osmAction);
-    mapMenu->addAction(yahooActionMap);
-    mapMenu->addAction(yahooActionSatellite);
-    mapMenu->addAction(googleActionMap);
+    ui->menu_View->addAction(osmAction);
+    ui->menu_View->addAction(yahooActionMap);
+    ui->menu_View->addAction(yahooActionSatellite);
+    ui->menu_View->addAction(googleActionMap);
 
     //hides the dock that shows waypoint's properties
     ui->wptDockWidget->hide();
@@ -473,3 +473,8 @@ double MainWindow::calculateLength(GpxWptType* from, GpxWptType* to)
     return (EARTH_RADIUS_IN_METERS * 2.0 * asin(sqrt(latitudeH + tmp*lontitudeH)));
 }
 
+
+void MainWindow::on_action_About_triggered()
+{
+    QMessageBox::about(this, tr("About GeoViodi"), tr("<b>GeoViodi</b> © 2010 Andrea \"Klenje\" Decorte<br />Version 0.01<br /><br /><a href=\"http://code.google.com/p/geoviodi\">Home page</a><br /><br />Thanks to <i>ildiavolo</i> for testing and ideas."));
+}
