@@ -67,8 +67,15 @@ void MetadataDialog::populate(GpxType *gpx)
     QHashIterator<QString, QString> i(hash);
     while (i.hasNext()) {
         i.next();
+        //loads values from hash
         QTableWidgetItem* item1 = new QTableWidgetItem(i.key());
         QTableWidgetItem* item2 = new QTableWidgetItem(i.value());
+
+        //set the values as read only
+        item1->setFlags(Qt::ItemIsSelectable);
+        item2->setFlags(Qt::ItemIsSelectable);
+
+        //adds items to table widget
         ui->tableWidget->setItem(row,0,item1);
         ui->tableWidget->setItem(row,1,item2);
         row++;

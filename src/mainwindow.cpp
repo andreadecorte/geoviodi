@@ -28,11 +28,15 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->actionAbout_Qt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+    connect(ui->actionShow_info_dock, SIGNAL(toggled(bool)), ui->wptDockWidget, SLOT(setVisible(bool)));
+    connect(ui->action_Show_statusbar, SIGNAL(toggled(bool)), ui->statusBar, SLOT(setVisible(bool)));
 
     gpxFile = NULL;
 
     // create MapControl
-    mc = new MapControl(QSize(400,300));
+    mc = new MapControl(QSize(477,335));
+    mc->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    mc->setMaximumSize(10000,10000);
 
     // create MapAdapter to get maps from
     mapadapter = new OSMMapAdapter();
@@ -254,7 +258,8 @@ void MainWindow::wheelEvent(QWheelEvent *event)
 
 void MainWindow::resizeEvent ( QResizeEvent * event )
 {
-    mc->resize(event->size());
+    //TODO find a better way to find out available space....
+    mc->resize(QSize(event->size().width()-23,event->size().height()-65));
 }
 
 void MainWindow::on_action_Info_triggered()
@@ -362,7 +367,7 @@ void MainWindow::pointClicked(Geometry *geometry,QPoint)
         ui->lbl_X->setText(QString::number(current->longitude()));
         ui->lbl_Y->setText(QString::number(current->latitude()));
         ui->lbl_Time->setText(list.at(1));
-        ui->lbl_Ele->setText(list.at(2));
+        ui->lbl_Ele->setText(list.at(2) + " m");
         ui->lbl_Desc->setText(list.at(3));
         ui->lbl_Type->setText(list.at(4));
     }
@@ -476,5 +481,5 @@ double MainWindow::calculateLength(GpxWptType* from, GpxWptType* to)
 
 void MainWindow::on_action_About_triggered()
 {
-    QMessageBox::about(this, tr("About GeoViodi"), tr("<b>GeoViodi</b> © 2010 Andrea \"Klenje\" Decorte<br />Version 0.01<br /><br /><a href=\"http://code.google.com/p/geoviodi\">Home page</a><br /><br />Thanks to <i>ildiavolo</i> for testing and ideas."));
+    QMessageBox::about(this, tr("About GeoViodi"), tr("<b>GeoViodi</b> © 2010 Andrea \"Klenje\" Decorte<br />Version 0.01<br />Released under Gnu General Public License 3<br /><br /><a href=\"http://code.google.com/p/geoviodi\">Home page</a><br /><br />Thanks to <i>ildiavolo</i> for testing and ideas."));
 }
