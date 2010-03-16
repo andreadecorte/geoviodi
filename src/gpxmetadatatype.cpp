@@ -24,6 +24,7 @@
 GpxMetadataType::GpxMetadataType()
 {
     _bounds = NULL;
+    _author = NULL;
 }
 
 QString const GpxMetadataType::getName()
@@ -46,12 +47,12 @@ void GpxMetadataType::setDesc(QString desc)
     _desc = desc;
 }
 
-QString const GpxMetadataType::getAuthor()
+GpxPersonType* const GpxMetadataType::getAuthor()
 {
     return _author;
 }
 
-void GpxMetadataType::setAuthor(QString author)
+void GpxMetadataType::setAuthor(GpxPersonType* author)
 {
     _author = author;
 }
@@ -101,8 +102,14 @@ QHash<QString,QString> const GpxMetadataType::getMetadataList()
         dict.insert("Name", _name);
     if (!_desc.isEmpty())
         dict.insert("Description", _desc);
-    if (!_author.isEmpty())
-        dict.insert("Author", _author);
+    if (_author != NULL)
+    {
+        if (!_author->getEmail().isEmpty())
+            dict.insert("Author", _author->getName() + " (" + _author->getEmail() + ")");
+        else {
+            dict.insert("Author", _author->getName());
+        }
+    }
     if (!_time.isNull())
         dict.insert("Date", _time.toString());
     if (!_keywords.isNull())
@@ -120,8 +127,11 @@ QHash<QString,QString> const GpxMetadataType::getMetadataList()
         QListIterator<GpxLinkType*> k(_link);
         while (k.hasNext()) {
             GpxLinkType* current = k.next();
-            QString key = QString().append(current->getText()).append(" (").append(current->getUrl()->toString()).append(" )");
-            dict.insert("Link", key);
+            if (!current->getText().isEmpty() && current->getUrl() != NULL)
+            {
+                QString key = QString().append(current->getText()).append(" (").append(current->getUrl()->toString()).append(" )");
+                dict.insert("Link", key);
+            }
         }
     }
     return dict;

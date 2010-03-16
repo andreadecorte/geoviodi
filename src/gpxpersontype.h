@@ -16,48 +16,36 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor,
 * Boston, MA 02110-1301 USA
 *
-* Created 03/03/2010
+* Created 16/03/2010
 */
 
+#ifndef GPXPERSONTYPE_H
+#define GPXPERSONTYPE_H
 #include "gpxlinktype.h"
 
-GpxLinkType::GpxLinkType()
+/**
+  * A person or organization.
+  */
+class GpxPersonType
 {
-    _href = NULL;
-}
+public:
+    GpxPersonType();
+    GpxPersonType(QString name);
+    QString const getName();
+    void setName(QString name);
+    QString const getEmail();
+    void setEmail(QString email);
+    void setEmail(QString id, QString domain);
+    GpxLinkType* const getLink();
+    void setLink(GpxLinkType* link);
 
-GpxLinkType::GpxLinkType(QString name, QUrl* url)
-{
-    _text = name;
-    _href = url;
-}
+private:
+    //Name of person or organization.
+    QString _name;
+    //Email address.
+    QString _email;
+    //Link to Web site or other external information about person.
+    GpxLinkType* _link;
+};
 
-QString const GpxLinkType::getText()
-{
-    return _text;
-}
-
-void GpxLinkType::setText(QString text)
-{
-    _text = text;
-}
-
-QString const GpxLinkType::getType()
-{
-    return _type;
-}
-
-void GpxLinkType::setType(QString type)
-{
-    _type = type;
-}
-
-QUrl* const GpxLinkType::getUrl()
-{
-    return _href;
-}
-
-void GpxLinkType::setUrl(QUrl* url)
-{
-    _href = url;
-}
+#endif // GPXPERSONTYPE_H

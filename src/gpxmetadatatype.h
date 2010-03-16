@@ -21,11 +21,11 @@
 
 #ifndef GPXMETADATATYPE_H
 #define GPXMETADATATYPE_H
-#include <QString>
 #include <QList>
 #include <QDateTime>
 #include "gpxlinktype.h"
 #include "gpxboundstype.h"
+#include "gpxpersontype.h"
 
 /**
   * Information about the GPX file, author, and copyright restrictions goes in the metadata section.  Providing rich,
@@ -39,8 +39,8 @@ public:
     void setName (QString name);
     QString const getDesc();
     void setDesc (QString desc);
-    QString const getAuthor();
-    void setAuthor (QString author);
+    GpxPersonType* const getAuthor();
+    void setAuthor (GpxPersonType* author);
     QDateTime const getTime();
     void setTime (QDateTime time);
     void setTime (QString time);
@@ -59,7 +59,7 @@ private:
     //A description of the contents of the GPX file.
     QString _desc;
     //The person or organization who created the GPX file.
-    QString _author;
+    GpxPersonType* _author;
     //Copyright and license information governing use of the file.
     //GpxCopyrightType* _copyright;
     //URLs associated with the location described in the file.

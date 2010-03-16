@@ -21,7 +21,6 @@
 
 #ifndef GPXLINKTYPE_H
 #define GPXLINKTYPE_H
-#include <QString>
 #include <QUrl>
 
 /**
@@ -31,6 +30,7 @@ class GpxLinkType
 {
 public:
     GpxLinkType();
+    GpxLinkType(QString name, QUrl* url);
     QString const getText();
     void setText (QString text);
     QString const getType();

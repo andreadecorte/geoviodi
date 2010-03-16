@@ -56,10 +56,10 @@ void MetadataDialog::populate(GpxType *gpx)
     //adding two more tags that we can found outside metadata...still interesting though
     if (!(gpx->getCreator().isNull()))
     {
-        hash.insert("Creator",gpx->getCreator());
+        hash.insert("Creator", gpx->getCreator());
     }
     if (!(gpx->getVersion().isNull())) {
-        hash.insert("Version",gpx->getVersion());
+        hash.insert("Gpx version", gpx->getVersion());
     }
     ui->tableWidget->setRowCount(hash.count());
     ui->tableWidget->setColumnCount(2);

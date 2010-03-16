@@ -42,7 +42,8 @@ SOURCES += src/main.cpp \
     src/QMapControl/emptymapadapter.cpp \
     src/QMapControl/curve.cpp \
     src/QMapControl/circlepoint.cpp \
-    src/metadatadialog.cpp
+    src/metadatadialog.cpp \
+    src/gpxpersontype.cpp
 HEADERS += src/mainwindow.h \
     src/gpxlatitudetype.h \
     src/gpxlongitudetype.h \
@@ -80,7 +81,8 @@ HEADERS += src/mainwindow.h \
     src/QMapControl/emptymapadapter.h \
     src/QMapControl/curve.h \
     src/QMapControl/circlepoint.h \
-    src/metadatadialog.h
+    src/metadatadialog.h \
+    src/gpxpersontype.h
 FORMS += src/mainwindow.ui \
     src/metadatadialog.ui
 OTHER_FILES += bregoli.gpx

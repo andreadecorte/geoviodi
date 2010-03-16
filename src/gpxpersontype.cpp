@@ -16,48 +16,51 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor,
 * Boston, MA 02110-1301 USA
 *
-* Created 03/03/2010
+* Created 16/03/2010
 */
 
-#include "gpxlinktype.h"
+#include "gpxpersontype.h"
 
-GpxLinkType::GpxLinkType()
+GpxPersonType::GpxPersonType()
 {
-    _href = NULL;
 }
 
-GpxLinkType::GpxLinkType(QString name, QUrl* url)
+GpxPersonType::GpxPersonType(QString name)
 {
-    _text = name;
-    _href = url;
+    _name = name;
 }
 
-QString const GpxLinkType::getText()
+QString const GpxPersonType::getName()
 {
-    return _text;
+    return _name;
 }
 
-void GpxLinkType::setText(QString text)
+void GpxPersonType::setName(QString name)
 {
-    _text = text;
+    _name = name;
 }
 
-QString const GpxLinkType::getType()
+QString const GpxPersonType::getEmail()
 {
-    return _type;
+    return _email;
 }
 
-void GpxLinkType::setType(QString type)
+void GpxPersonType::setEmail(QString email)
 {
-    _type = type;
+    _email = email;
 }
 
-QUrl* const GpxLinkType::getUrl()
+void GpxPersonType::setEmail(QString id, QString domain)
 {
-    return _href;
+    _email = id.append("@").append(domain);
 }
 
-void GpxLinkType::setUrl(QUrl* url)
+GpxLinkType* const GpxPersonType::getLink()
 {
-    _href = url;
+    return _link;
+}
+
+void GpxPersonType::setLink(GpxLinkType* link)
+{
+    _link = link;
 }

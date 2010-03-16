@@ -364,8 +364,8 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
         tracks.append(points);
     }
 
-    bug() << "lunghezza percorso " << length;
-    bug() << "numero tracce " << trkCounter;
+    qDebug() << "lunghezza percorso " << length;
+    qDebug() << "numero tracce " << trkCounter;
     if (boundsCalc)
     {
         gpxFile->getMetadata()->setBounds(new GpxBoundsType(minLon, maxLon, minLat, maxLat));
