@@ -28,10 +28,24 @@
 #include <QString>
 #include <QXmlStreamReader>
 #include <QFile>
+#include <QThread>
 
-namespace XmlLoader
+class XmlLoader : public QThread
 {
-    GpxType* loadFromGpx(QString fileName);
+    Q_OBJECT
+
+public:
+    void run();
+    void setFileName (QString fileName);
+    QString getFileName ();
+    GpxType* getGpx();
+
+private:
+    QString _fileName;
+    GpxType* _gpxFile;
+
+signals:
+    void progress ( int value );
 };
 
 #endif // XMLLOADER_H

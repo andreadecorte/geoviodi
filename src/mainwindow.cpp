@@ -110,97 +110,24 @@ void MainWindow::changeEvent(QEvent *e)
 
 void MainWindow::on_action_Open_triggered()
 {
+    loadingProgressBar = new QProgressBar(this);
+    ui->statusBar->addWidget(loadingProgressBar);
     if (gpxFile != NULL)
         on_action_Close_triggered();
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open GPX file"), "", tr("Gpx files (*.gpx)"));
     if (fileName.isEmpty())
         return;
-    gpxFile = XmlLoader::loadFromGpx(fileName);
-    ui->statusBar->showMessage(fileName + " " + tr("loaded"));
 
-    geom->clearGeometries();
+    //launch a new thread which loads file contents
+    xml = new XmlLoader;
+    xml->setFileName(fileName);
+    xml->start();
 
-    QList<QList<Point*> > tracks = prepareTrkLine();
+    //when thread finishes, drawMap() is called
+    connect(xml,SIGNAL(finished()),this,SLOT(drawMap()));
 
-    QListIterator<QList<Point*> > i(tracks);
-    while (i.hasNext())
-    {
-        // A QPen also can use transparency
-        QPen* linepen = new QPen(QColor((rand()%255), 60, 60, 100)); //randomize red value
-        linepen->setWidth(7);
-        LineString* line = new LineString(i.next(), "", linepen);
-        // Add the LineString to the layer
-        geom->addGeometry(line);
-    }
-
-    connect(geom, SIGNAL(geometryClicked(Geometry*,QPoint)),this,SLOT(pointClicked(Geometry*,QPoint)));
-
-    QListIterator<GpxWptType*> l(gpxFile->getList());
-    while (l.hasNext())
-    {
-        GpxWptType* current = l.next();
-        QString wptCurrentName = "";
-        if (!current->getName().isEmpty())
-        {
-            wptCurrentName = current->getName();
-        }
-        else
-        {
-            wptCurrentName.append("No name");
-        }
-        wptCurrentName.append("???");
-        if (!current->getTime().isNull())
-            wptCurrentName.append(current->getTime().toString());
-        else
-        {
-            wptCurrentName.append("No");
-        }
-        wptCurrentName.append("???");
-        if (current->getEle() != -10000)
-            wptCurrentName.append(QString::number(current->getEle()));
-        else
-        {
-            wptCurrentName.append("No");
-        }
-        wptCurrentName.append("???");
-        if (!current->getDesc().isEmpty())
-            wptCurrentName.append(current->getDesc());
-        else
-        {
-            wptCurrentName.append("No");
-        }
-        wptCurrentName.append("???");
-        if (!current->getType().isEmpty())
-            wptCurrentName.append(current->getType());
-        else
-        {
-            wptCurrentName.append("No");
-        }
-
-        geom->addGeometry(new CirclePoint(current->getLon()->getLongitude(), current->getLat()->getLatitude(), wptCurrentName, Point::Middle));
-    }
-
-    mc->addLayer(geom);
-
-    //let's enable the menus
-    ui->action_Info->setEnabled(true);
-    ui->action_Close->setEnabled(true);
-
-    QList<QPointF> view;
-    if (gpxFile->getMetadata()->getBounds() != NULL)
-    {
-        //without this, the zoom won't be the right one
-        mc->setZoom(0);
-
-        view.append(QPointF(gpxFile->getMetadata()->getBounds()->getMinlon()->getLongitude(), gpxFile->getMetadata()->getBounds()->getMinlat()->getLatitude()));
-        view.append(QPointF(gpxFile->getMetadata()->getBounds()->getMaxlon()->getLongitude(), gpxFile->getMetadata()->getBounds()->getMaxlat()->getLatitude()));
-        mc->setViewAndZoomIn(view);
-    }
-    else
-    {
-        //this shouldn't happen, but just in case...
-        goToInitialCoordinates();
-    }
+    //update progress bar
+    connect(xml,SIGNAL(progress(int)),loadingProgressBar,SLOT(setValue(int)));
 }
 
 void MainWindow::on_action_Exit_triggered()
@@ -275,12 +202,14 @@ void MainWindow::on_action_Close_triggered()
     if (gpxFile == NULL)
         return;
     delete gpxFile;
+    mc->showScale(false); //cosmetic
     geom->clearGeometries();
     ui->statusBar->clearMessage();
     ui->action_Close->setEnabled(false);
     ui->action_Info->setEnabled(false);
     gpxFile = NULL;
     goToInitialCoordinates();
+    mc->showScale(true);
     return;
 }
 
@@ -482,4 +411,100 @@ double MainWindow::calculateLength(GpxWptType* from, GpxWptType* to)
 void MainWindow::on_action_About_triggered()
 {
     QMessageBox::about(this, tr("About GeoViodi"), tr("<b>GeoViodi</b> © 2010 Andrea \"Klenje\" Decorte<br />Version 0.01<br />Released under Gnu General Public License 3<br /><br /><a href=\"http://code.google.com/p/geoviodi\">Home page</a><br /><br />Thanks to <i>ildiavolo</i> for testing and ideas."));
+}
+
+/**
+  * @brief draws the map after we loaded a gpx file
+  */
+void MainWindow::drawMap()
+{
+    gpxFile = xml->getGpx();
+    geom->clearGeometries();
+
+    loadingProgressBar->setValue(65);
+    QList<QList<Point*> > tracks = prepareTrkLine();
+
+    QListIterator<QList<Point*> > i(tracks);
+    while (i.hasNext())
+    {
+        // A QPen also can use transparency
+        QPen* linepen = new QPen(QColor((rand()%255), 60, 60, 100)); //randomize red value
+        linepen->setWidth(7);
+        LineString* line = new LineString(i.next(), "", linepen);
+        // Add the LineString to the layer
+        geom->addGeometry(line);
+    }
+
+    connect(geom, SIGNAL(geometryClicked(Geometry*,QPoint)),this,SLOT(pointClicked(Geometry*,QPoint)));
+
+    QListIterator<GpxWptType*> l(gpxFile->getList());
+    while (l.hasNext())
+    {
+        GpxWptType* current = l.next();
+        QString wptCurrentName = "";
+        if (!current->getName().isEmpty())
+        {
+            wptCurrentName = current->getName();
+        }
+        else
+        {
+            wptCurrentName.append("No name");
+        }
+        wptCurrentName.append("???");
+        if (!current->getTime().isNull())
+            wptCurrentName.append(current->getTime().toString());
+        else
+        {
+            wptCurrentName.append("No");
+        }
+        wptCurrentName.append("???");
+        if (current->getEle() != -10000)
+            wptCurrentName.append(QString::number(current->getEle()));
+        else
+        {
+            wptCurrentName.append("0");
+        }
+        wptCurrentName.append("???");
+        if (!current->getDesc().isEmpty())
+            wptCurrentName.append(current->getDesc());
+        else
+        {
+            wptCurrentName.append("No");
+        }
+        wptCurrentName.append("???");
+        if (!current->getType().isEmpty())
+            wptCurrentName.append(current->getType());
+        else
+        {
+            wptCurrentName.append("No");
+        }
+
+        geom->addGeometry(new CirclePoint(current->getLon()->getLongitude(), current->getLat()->getLatitude(), wptCurrentName, Point::Middle));
+    }
+
+    mc->addLayer(geom);
+
+    //let's enable the menus
+    ui->action_Info->setEnabled(true);
+    ui->action_Close->setEnabled(true);
+    loadingProgressBar->setValue(85);
+
+    QList<QPointF> view;
+    if (gpxFile->getMetadata()->getBounds() != NULL)
+    {
+        //without this, the zoom won't be the right one
+        mc->setZoom(0);
+
+        view.append(QPointF(gpxFile->getMetadata()->getBounds()->getMinlon()->getLongitude(), gpxFile->getMetadata()->getBounds()->getMinlat()->getLatitude()));
+        view.append(QPointF(gpxFile->getMetadata()->getBounds()->getMaxlon()->getLongitude(), gpxFile->getMetadata()->getBounds()->getMaxlat()->getLatitude()));
+        mc->setViewAndZoomIn(view);
+    }
+    else
+    {
+        //this shouldn't happen, but just in case...
+        goToInitialCoordinates();
+    }
+    loadingProgressBar->setValue(100);
+    ui->statusBar->removeWidget(loadingProgressBar);
+    ui->statusBar->showMessage(xml->getFileName() + " " + tr("loaded"));
 }

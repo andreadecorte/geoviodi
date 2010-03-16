@@ -22,8 +22,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-
 #include "QMapControl/mapcontrol.h"
 #include "QMapControl/mapadapter.h"
 #include "QMapControl/maplayer.h"
@@ -40,6 +38,7 @@
 #include "gpxtype.h"
 #include "xmlloader.h"
 
+#include <QMainWindow>
 #include <QDateTime>
 #include <QFileDialog>
 
@@ -70,6 +69,8 @@ private:
     Layer* l;
     Layer* geom;
     GpxType* gpxFile;
+    XmlLoader* xml;
+    QProgressBar* loadingProgressBar;
 
     QAction* osmAction;
     QAction* yahooActionMap;
@@ -89,6 +90,7 @@ private slots:
 public slots:
     void mapproviderSelected(QAction*);
     void pointClicked(Geometry  *geometry,QPoint);
+    void drawMap();
 };
 
 #endif // MAINWINDOW_H
