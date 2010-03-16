@@ -3,7 +3,7 @@
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
+* the Free Software Foundation; either version 3 of the License, or
 * (at your option) any later version.
 *
 * This program is distributed in the hope that it will be useful,
@@ -135,8 +135,8 @@ void MainWindow::on_action_Exit_triggered()
     /*QLocale c(QLocale::C);
     QLocale::setDefault(QLocale::Irish);
 
-    qDebug() << c.toDouble(("44.48934600"));
-    qDebug() << QString::number(44.48934600,'g',8);*/
+    bug() << c.toDouble(("44.48934600"));
+    bug() << QString::number(44.48934600,'g',8);*/
     QCoreApplication::exit(0);
 }
 
@@ -281,8 +281,8 @@ void MainWindow::pointClicked(Geometry *geometry,QPoint)
 {
     if (ui->wptDockWidget->isHidden())
         ui->wptDockWidget->show();
-    //qDebug() << "parent: " << geometry->parentGeometry();
-    //qDebug() << "Element clicked: " << geometry->name();
+    //bug() << "parent: " << geometry->parentGeometry();
+    //bug() << "Element clicked: " << geometry->name();
     QList< Point  * > list = geometry->points();
     QListIterator<Point*> i(list);
     while (i.hasNext())
@@ -332,7 +332,7 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
             QListIterator<GpxWptType*> k((j.next())->getTrkpt());
             GpxWptType* currentWpt;
             while (k.hasNext()) {
-                //qDebug() << counter++;
+                //bug() << counter++;
                 currentWpt = k.next();
                 if (boundsCalc)
                 {
@@ -364,8 +364,8 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
         tracks.append(points);
     }
 
-    qDebug() << "lunghezza percorso " << length;
-    qDebug() << "numero tracce " << trkCounter;
+    bug() << "lunghezza percorso " << length;
+    bug() << "numero tracce " << trkCounter;
     if (boundsCalc)
     {
         gpxFile->getMetadata()->setBounds(new GpxBoundsType(minLon, maxLon, minLat, maxLat));
