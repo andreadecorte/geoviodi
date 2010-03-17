@@ -421,6 +421,9 @@ void MainWindow::drawMap()
     gpxFile = xml->getGpx();
     geom->clearGeometries();
 
+    //remove scale to avoid annoying flickering
+    mc->showScale(false);
+
     loadingProgressBar->setValue(65);
     QList<QList<Point*> > tracks = prepareTrkLine();
 
@@ -504,6 +507,9 @@ void MainWindow::drawMap()
         //this shouldn't happen, but just in case...
         goToInitialCoordinates();
     }
+    //readd scale
+    mc->showScale(true);
+
     loadingProgressBar->setValue(100);
     ui->statusBar->removeWidget(loadingProgressBar);
     ui->statusBar->showMessage(xml->getFileName() + " " + tr("loaded"));

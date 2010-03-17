@@ -28,7 +28,6 @@ void XmlLoader::run()
     GpxType* gpx = new GpxType;
     GpxTrksegType* trkseg;
     GpxTrkType* trk;
-    QXmlStreamReader reader;
     QFile file(_fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
         qDebug() << "Error: Cannot read file " << qPrintable(_fileName)
@@ -197,36 +196,11 @@ void XmlLoader::run()
                 wpt->setLatLon(reader.attributes().value("lat").toString(), reader.attributes().value("lon").toString());
                 while (!(reader.tokenType() == QXmlStreamReader::EndElement && reader.name() == "wpt"))
                 {
-                    if (reader.name() == "name")
-                    {
-                        wpt->setName(reader.readElementText());
-                    }
-                    if (reader.name() == "cmt")
-                    {
-                        wpt->setCmt(reader.readElementText());
-                    }
-                    if (reader.name() == "sym")
-                        wpt->setSym(reader.readElementText());
-                    if (reader.name() == "time")
-                    {
-                        wpt->setTime(reader.readElementText());
-                    }
-                    if (reader.name() == "ele")
-                    {
-                        wpt->setEle(reader.readElementText());
-                    }
-                    if (reader.name() == "desc")
-                    {
-                        wpt->setDesc(reader.readElementText());
-                    }
-                    if (reader.name() == "type")
-                    {
-                        wpt->setType(reader.readElementText());
-                    }
+                    readWpt(wpt);
                     reader.readNext();
                 }
                 gpx->addWpt(wpt);
-                qDebug() << "Aggiunto punto";
+                qDebug() << "Aggiunto punto" << wpt->getName();
             }
             //let's read a track
             if (reader.name() == "trk")
@@ -255,12 +229,7 @@ void XmlLoader::run()
                                 //reader.readNext();
                                 while (!(reader.tokenType() == QXmlStreamReader::EndElement && reader.name() == "trkpt"))
                                 {
-                                    if (reader.name() == "ele") {
-                                        trkpt->setEle(reader.readElementText());
-                                    }
-                                    //reader.readNext();
-                                    if (reader.name() == "time")
-                                        trkpt->setTime(reader.readElementText());
+                                    readWpt(trkpt);
                                     reader.readNext();
                                 }
                                 trkseg->addTrkpt(trkpt);
@@ -298,6 +267,46 @@ void XmlLoader::run()
 
     _gpxFile = gpx;
     return;
+}
+
+//includes code for reading a waypoint, since it's used more times
+void XmlLoader::readWpt(GpxWptType* wpt)
+{
+    if (reader.name() == "name")
+    {
+        wpt->setName(reader.readElementText());
+    }
+    if (reader.name() == "cmt")
+    {
+        wpt->setCmt(reader.readElementText());
+    }
+    if (reader.name() == "sym")
+        wpt->setSym(reader.readElementText());
+    if (reader.name() == "time")
+    {
+        wpt->setTime(reader.readElementText());
+    }
+    if (reader.name() == "ele")
+    {
+        wpt->setEle(reader.readElementText());
+    }
+    if (reader.name() == "desc")
+    {
+        wpt->setDesc(reader.readElementText());
+    }
+    if (reader.name() == "type")
+    {
+        wpt->setType(reader.readElementText());
+    }
+    if (reader.name() == "fix")
+    {
+        wpt->setFix(reader.readElementText());
+    }
+    if (reader.name() == "geoidheight")
+    {
+        wpt->setGeoidheight(reader.readElementText());
+    }
+
 }
 
 void XmlLoader::setFileName(QString fileName)

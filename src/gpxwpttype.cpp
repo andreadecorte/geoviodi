@@ -153,3 +153,43 @@ void GpxWptType::setType(QString type)
     _type = type;
 }
 
+double const GpxWptType::getGeoidheight()
+{
+    return _geoidheight;
+}
+
+void GpxWptType::setGeoidheight(double height)
+{
+    _geoidheight = height;
+}
+
+bool GpxWptType::setGeoidheight(QString height)
+{
+    bool ok;
+    double res;
+    //Because we should interpret always the dot as decimal separator
+    QLocale::setDefault(QLocale::C);
+    res = height.toDouble(&ok);
+    _geoidheight = res;
+    return ok;
+}
+
+FixType GpxWptType::getFix()
+{
+    return _fix;
+}
+
+void GpxWptType::setFix (QString fix)
+{
+    if (fix == "2d")
+        _fix = FIX2D;
+    if (fix == "3d")
+        _fix = FIX3D;
+    if (fix == "none")
+        _fix = NONE;
+    if (fix == "dgps")
+        _fix = DGPS;
+    if (fix == "pps")
+        _fix = PPS;
+}
+

@@ -39,10 +39,12 @@ public:
     void setFileName (QString fileName);
     QString getFileName ();
     GpxType* getGpx();
+    QXmlStreamReader reader;
 
 private:
     QString _fileName;
     GpxType* _gpxFile;
+    void readWpt(GpxWptType* wpt);
 
 signals:
     void progress ( int value );
