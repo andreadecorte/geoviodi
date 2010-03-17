@@ -23,7 +23,6 @@
 #define GPXTRKTYPE_H
 #include "gpxlinktype.h"
 #include "gpxtrksegtype.h"
-#include <QString>
 
 /**
   * trk represents a track - an ordered list of points describing a path.

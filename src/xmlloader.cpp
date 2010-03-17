@@ -209,7 +209,6 @@ void XmlLoader::run()
                 reader.readNext();
                 while (!(reader.tokenType() == QXmlStreamReader::EndElement && reader.name() == "trk"))
                 {
-
                     if (reader.name() == "name") {
                         trk->setName(reader.readElementText());
                     }
@@ -246,7 +245,20 @@ void XmlLoader::run()
             //let's read a route
             if (reader.name() == "rte")
             {
-                //not implemented yet
+                GpxRteType* rte = new GpxRteType;
+                reader.readNext();
+                while (!(reader.tokenType() == QXmlStreamReader::EndElement && reader.name() == "rte"))
+                {
+                    if (reader.name() == "name")
+                        rte->setName(reader.readElementText());
+                    if (reader.name() == "cmt")
+                        rte->setCmt(reader.readElementText());
+                    if (reader.name() == "desc")
+                        rte->setDesc(reader.readElementText());
+                    if (reader.name() == "number")
+                        rte->setNumber(reader.readElementText());
+                    reader.readNext();
+                }
             }
         }
 

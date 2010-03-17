@@ -25,7 +25,7 @@
 #include "gpxwpttype.h"
 #include "gpxtrktype.h"
 #include "gpxtrksegtype.h"
-#include <QString>
+#include "gpxrtetype.h"
 #include <QXmlStreamReader>
 #include <QFile>
 #include <QThread>
