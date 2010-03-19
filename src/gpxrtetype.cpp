@@ -118,3 +118,8 @@ void GpxRteType::setRtept(QList<GpxWptType*> points)
     _rtept = points;
 }
 
+void GpxRteType::addRtept(GpxWptType* pt)
+{
+    _rtept.append(pt);
+}
+

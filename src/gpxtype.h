@@ -20,10 +20,11 @@
 */
 
 #ifndef GPXTYPE_H
+#define GPXTYPE_H
 #include "gpxwpttype.h"
 #include "gpxtrktype.h"
 #include "gpxmetadatatype.h"
-#define GPXTYPE_H
+#include "gpxrtetype.h"
 
 class GpxType
 {
@@ -31,7 +32,7 @@ public:
     GpxType();
     GpxWptType* getFirstWpt();
     void addWpt (GpxWptType* wpt);
-    QList<GpxWptType*> const getList();
+    QList<GpxWptType*> const getWptList();
     void addTrk (GpxTrkType* trk);
     QList<GpxTrkType*> const getTrkList();
     QString const getVersion();
@@ -40,11 +41,13 @@ public:
     void setCreator (QString creator);
     GpxMetadataType* const getMetadata();
     void setMetadata(GpxMetadataType* metadata);
+    QList<GpxRteType*> getRteList();
+    void addRte (GpxRteType* rte);
 
 private:
     GpxMetadataType* _metadata;
     QList<GpxWptType*> _wptList;
-    //QList<GpxRteType*> _rteList;
+    QList<GpxRteType*> _rteList;
     QList<GpxTrkType*> _trkList;
     QString _version;
     QString _creator;

@@ -29,6 +29,7 @@
 #include "QMapControl/yahoomapadapter.h"
 #include "QMapControl/googlesatmapadapter.h"
 #include "QMapControl/circlepoint.h"
+#include "QMapControl/imagepoint.h"
 #include "QMapControl/linestring.h"
 #include "QMapControl/geometrylayer.h"
 
@@ -56,6 +57,7 @@ public:
     double calculateLength(GpxWptType* from, GpxWptType* to);
     void goToInitialCoordinates();
     QList<QList<Point*> > prepareTrkLine();
+    QList<QList<Point*> > prepareRteLine();
 
 protected:
     void changeEvent(QEvent *e);

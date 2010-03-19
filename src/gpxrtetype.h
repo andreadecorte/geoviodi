@@ -48,6 +48,7 @@ public:
     void setType(QString type);
     QList<GpxWptType*> getRtept();
     void setRtept(QList<GpxWptType*> points);
+    void addRtept(GpxWptType* pt);
 
 private:
     //GPS name of route.

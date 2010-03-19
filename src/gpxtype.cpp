@@ -36,7 +36,7 @@ void GpxType::addWpt(GpxWptType *wpt)
     _wptList.append(wpt);
 }
 
-QList<GpxWptType*> const GpxType::getList()
+QList<GpxWptType*> const GpxType::getWptList()
 {
     return _wptList;
 }
@@ -79,4 +79,14 @@ GpxMetadataType* const GpxType::getMetadata()
 void GpxType::setMetadata(GpxMetadataType* metadata)
 {
     _metadata = metadata;
+}
+
+QList<GpxRteType*> GpxType::getRteList()
+{
+    return _rteList;
+}
+
+void GpxType::addRte (GpxRteType* rte)
+{
+    _rteList.append(rte);
 }

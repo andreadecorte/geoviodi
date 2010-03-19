@@ -167,6 +167,18 @@ void XmlLoader::run()
                     author->setName(reader.readElementText());
                 if (reader.name() == "email")
                     email = reader.readElementText();
+                if (reader.name() == "bounds")
+                {
+                    if (!reader.attributes().value("maxlat").toString().isEmpty())
+                    {
+                        GpxBoundsType* bounds = new GpxBoundsType;
+                        bounds->setMaxlat(new GpxLatitudeType(reader.attributes().value("maxlat").toString()));
+                        bounds->setMinlat(new GpxLatitudeType(reader.attributes().value("minlat").toString()));
+                        bounds->setMaxlon(new GpxLongitudeType(reader.attributes().value("maxlon").toString()));
+                        bounds->setMinlon(new GpxLongitudeType(reader.attributes().value("minlon").toString()));
+                        metadata->setBounds(bounds);
+                    }
+                }
                 if (reader.name() == "keywords")
                     metadata->setKeywords(reader.readElementText());
                 if (reader.name() == "url")
@@ -255,10 +267,45 @@ void XmlLoader::run()
                         rte->setCmt(reader.readElementText());
                     if (reader.name() == "desc")
                         rte->setDesc(reader.readElementText());
+                    if (reader.name() == "src")
+                        rte->setSrc(reader.readElementText());
+                    if (reader.name() == "type")
+                        rte->setType(reader.readElementText());
+                    if (reader.name() == "link")
+                    {
+                        GpxLinkType* link = new GpxLinkType;
+                        while (!(reader.tokenType() == QXmlStreamReader::EndElement && reader.name() == "link"))
+                        {
+                            if (!reader.attributes().value("href").toString().isEmpty())
+                                link->setUrl(new QUrl(reader.attributes().value("href").toString()));
+                            if (reader.name() == "text") {
+                                link->setText(reader.readElementText());
+                            }
+                            if (reader.name() == "type") {
+                                link->setType(reader.readElementText());
+                            }
+                            reader.readNext();
+                        }
+                        rte->getLinks().append(link);
+                    }
                     if (reader.name() == "number")
                         rte->setNumber(reader.readElementText());
+                    if (reader.name() == "rtept")
+                    {
+                        //inizialitize rtept otherwise we'll get always the same value
+                        GpxWptType* rtept = new GpxWptType;
+                        rtept->setLatLon(reader.attributes().value("lat").toString(), reader.attributes().value("lon").toString());
+                        while (!(reader.tokenType() == QXmlStreamReader::EndElement && reader.name() == "rtept"))
+                        {
+                            readWpt(rtept);
+                            reader.readNext();
+                        }
+                        rte->addRtept(rtept);
+                    }
                     reader.readNext();
                 }
+                gpx->addRte(rte);
+                qDebug() << rte->getName() << rte->getRtept().length();
             }
         }
 

@@ -321,57 +321,164 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
     GpxWptType* previousWpt = NULL;
     double length = 0;
 
-    QListIterator<GpxTrkType*> i(gpxFile->getTrkList());
-    while (i.hasNext())
-    {
-        trkCounter++;
-        QList<Point*> points;
-        QListIterator<GpxTrksegType*> j((i.next())->getTrksegType());
-        while (j.hasNext())
+        QListIterator<GpxTrkType*> i(gpxFile->getTrkList());
+        while (i.hasNext())
         {
-            QListIterator<GpxWptType*> k((j.next())->getTrkpt());
-            GpxWptType* currentWpt;
-            while (k.hasNext()) {
-                //bug() << counter++;
-                currentWpt = k.next();
-                if (boundsCalc)
-                {
-                    if (currentWpt->getLon()->getLongitude() > minLon)
-                        minLon = currentWpt->getLon()->getLongitude();
-                    if (currentWpt->getLon()->getLongitude() < maxLon)
-                        maxLon = currentWpt->getLon()->getLongitude();
-                    if (currentWpt->getLat()->getLatitude() > minLat)
-                        minLat = currentWpt->getLat()->getLatitude();
-                    if (currentWpt->getLat()->getLatitude() < maxLat)
-                        maxLat = currentWpt->getLat()->getLatitude();
-                }
+            trkCounter++;
+            QList<Point*> points;
+            QListIterator<GpxTrksegType*> j((i.next())->getTrksegType());
+            while (j.hasNext())
+            {
+                QListIterator<GpxWptType*> k((j.next())->getTrkpt());
+                GpxWptType* currentWpt;
+                while (k.hasNext()) {
+                    //bug() << counter++;
+                    currentWpt = k.next();
+                    if (boundsCalc)
+                    {
+                        if (currentWpt->getLon()->getLongitude() > minLon)
+                            minLon = currentWpt->getLon()->getLongitude();
+                        if (currentWpt->getLon()->getLongitude() < maxLon)
+                            maxLon = currentWpt->getLon()->getLongitude();
+                        if (currentWpt->getLat()->getLatitude() > minLat)
+                            minLat = currentWpt->getLat()->getLatitude();
+                        if (currentWpt->getLat()->getLatitude() < maxLat)
+                            maxLat = currentWpt->getLat()->getLatitude();
+                    }
 
-                //if (tempWpt == NULL || tempWpt->getLon() == NULL)
-                //    break;
-                if (previousWpt != NULL)
-                {
-                    length += calculateLength(previousWpt, currentWpt);
+                    //if (tempWpt == NULL || tempWpt->getLon() == NULL)
+                    //    break;
+                    if (previousWpt != NULL)
+                    {
+                        length += calculateLength(previousWpt, currentWpt);
+                    }
+                    QString wptName = "";
+                    if (!currentWpt->getName().isNull())
+                    {
+                        wptName = currentWpt->getName();
+                    }
+                    points.append(new Point(currentWpt->getLon()->getLongitude(), currentWpt->getLat()->getLatitude(), wptName, Point::BottomLeft));
+                    previousWpt = currentWpt;
                 }
-                QString wptName = "";
-                if (!currentWpt->getName().isNull())
-                {
-                    wptName = currentWpt->getName();
-                }
-                points.append(new Point(currentWpt->getLon()->getLongitude(), currentWpt->getLat()->getLatitude(), wptName, Point::BottomLeft));
-                previousWpt = currentWpt;
             }
+            tracks.append(points);
         }
-        tracks.append(points);
-    }
 
-    qDebug() << "lunghezza percorso " << length;
-    qDebug() << "numero tracce " << trkCounter;
+        qDebug() << "lunghezza percorso " << length;
+        qDebug() << "numero tracce " << trkCounter;
+
+
     if (boundsCalc)
     {
         gpxFile->getMetadata()->setBounds(new GpxBoundsType(minLon, maxLon, minLat, maxLat));
     }
 
     return tracks;
+}
+
+
+QList<QList<Point*> > MainWindow::prepareRteLine()
+{
+    //we need a nested list since we could have more tracks in a single gpx file
+    QList<QList<Point*> > routes;
+
+    int rteCounter = 0;
+
+    //needs this to calculate the bounds
+    double minLat = -180.0;
+    double maxLat = 180.0;
+    double minLon = -180.0;
+    double maxLon = 180.0;
+    bool boundsCalc = false;
+    if (gpxFile->getMetadata()->getBounds() == NULL)
+        boundsCalc = true;
+
+    QPixmap* flag = new QPixmap("../src/img/redflag2.png");
+    qDebug() << flag->height();
+    GpxWptType* previousWpt = NULL;
+    double length = 0;
+
+        QListIterator<GpxRteType*> i(gpxFile->getRteList());
+        while (i.hasNext())
+        {
+            rteCounter++;
+            QList<Point*> points;
+                QListIterator<GpxWptType*> k((i.next())->getRtept());
+                GpxWptType* currentWpt;
+                while (k.hasNext()) {
+
+                    currentWpt = k.next();
+                    if (boundsCalc)
+                    {
+                        if (currentWpt->getLon()->getLongitude() > minLon)
+                            minLon = currentWpt->getLon()->getLongitude();
+                        if (currentWpt->getLon()->getLongitude() < maxLon)
+                            maxLon = currentWpt->getLon()->getLongitude();
+                        if (currentWpt->getLat()->getLatitude() > minLat)
+                            minLat = currentWpt->getLat()->getLatitude();
+                        if (currentWpt->getLat()->getLatitude() < maxLat)
+                            maxLat = currentWpt->getLat()->getLatitude();
+                    }
+
+                    //if (tempWpt == NULL || tempWpt->getLon() == NULL)
+                    //    break;
+                    if (previousWpt != NULL)
+                    {
+                        length += calculateLength(previousWpt, currentWpt);
+                    }
+                    QString wptCurrentName = "";
+                    if (!currentWpt->getName().isEmpty())
+                    {
+                        wptCurrentName = currentWpt->getName();
+                    }
+                    else
+                    {
+                        wptCurrentName.append("No name");
+                    }
+                    wptCurrentName.append("???");
+                    if (!currentWpt->getTime().isNull())
+                        wptCurrentName.append(currentWpt->getTime().toString());
+                    else
+                    {
+                        wptCurrentName.append("No");
+                    }
+                    wptCurrentName.append("???");
+                    if (currentWpt->getEle() != -10000)
+                        wptCurrentName.append(QString::number(currentWpt->getEle()));
+                    else
+                    {
+                        wptCurrentName.append("0");
+                    }
+                    wptCurrentName.append("???");
+                    if (!currentWpt->getDesc().isEmpty())
+                        wptCurrentName.append(currentWpt->getDesc());
+                    else
+                    {
+                        wptCurrentName.append("No");
+                    }
+                    wptCurrentName.append("???");
+                    if (!currentWpt->getType().isEmpty())
+                        wptCurrentName.append(currentWpt->getType());
+                    else
+                    {
+                        wptCurrentName.append("No");
+                    }
+                    points.append(new ImagePoint(currentWpt->getLon()->getLongitude(), currentWpt->getLat()->getLatitude(), flag, wptCurrentName, Point::BottomLeft));
+                    previousWpt = currentWpt;
+                }
+            routes.append(points);
+        }
+
+        qDebug() << "lunghezza percorso " << length;
+        qDebug() << "numero routes " << rteCounter;
+
+
+    if (boundsCalc)
+    {
+        gpxFile->getMetadata()->setBounds(new GpxBoundsType(minLon, maxLon, minLat, maxLat));
+    }
+
+    return routes;
 }
 
 /** @brief Computes the arc, in radian, between two WGS-84 positions.
@@ -427,20 +534,27 @@ void MainWindow::drawMap()
     loadingProgressBar->setValue(65);
     QList<QList<Point*> > tracks = prepareTrkLine();
 
-    QListIterator<QList<Point*> > i(tracks);
-    while (i.hasNext())
+
+    //draw tracks if there is at least one
+    if (!tracks.isEmpty())
     {
-        // A QPen also can use transparency
-        QPen* linepen = new QPen(QColor((rand()%255), 60, 60, 100)); //randomize red value
-        linepen->setWidth(7);
-        LineString* line = new LineString(i.next(), "", linepen);
-        // Add the LineString to the layer
-        geom->addGeometry(line);
+
+        QListIterator<QList<Point*> > i(tracks);
+        while (i.hasNext())
+        {
+            // A QPen also can use transparency
+            QPen* linepen = new QPen(QColor((rand()%255), 60, 60, 100)); //randomize red value
+            linepen->setWidth(7);
+            LineString* line = new LineString(i.next(), "", linepen);
+            // Add the LineString to the layer
+            geom->addGeometry(line);
+        }
     }
 
     connect(geom, SIGNAL(geometryClicked(Geometry*,QPoint)),this,SLOT(pointClicked(Geometry*,QPoint)));
 
-    QListIterator<GpxWptType*> l(gpxFile->getList());
+    //draw waypoints
+    QListIterator<GpxWptType*> l(gpxFile->getWptList());
     while (l.hasNext())
     {
         GpxWptType* current = l.next();
@@ -485,6 +599,21 @@ void MainWindow::drawMap()
         geom->addGeometry(new CirclePoint(current->getLon()->getLongitude(), current->getLat()->getLatitude(), wptCurrentName, Point::Middle));
     }
 
+    //draw routes
+    if (!gpxFile->getRteList().isEmpty())
+    {
+        QList<QList<Point*> > routes = prepareRteLine();
+        QListIterator<QList<Point*> > r(routes);
+        while (r.hasNext())
+        {
+            // A QPen also can use transparency
+            QPen* linepen = new QPen(QColor(60, 60, (rand()%255), 100)); //randomize red value
+            linepen->setWidth(7);
+            LineString* line = new LineString(r.next(), "", linepen);
+            // Add the LineString to the layer
+            geom->addGeometry(line);
+        }
+    }
     mc->addLayer(geom);
 
     //let's enable the menus
