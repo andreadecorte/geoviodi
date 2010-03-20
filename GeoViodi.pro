@@ -88,3 +88,6 @@ HEADERS += src/mainwindow.h \
 FORMS += src/mainwindow.ui \
     src/metadatadialog.ui
 OTHER_FILES += bregoli.gpx
+LIBS += C:\Qt\2010.02.1\qt\lib\libqwt5.a
+INCLUDEPATH += C:\Qt\2010.02.1\qwt-5.2.0\src
+DEFINES += QWT_DLL

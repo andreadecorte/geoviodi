@@ -21,6 +21,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "qwt_plot_curve.h"
 
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
@@ -30,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionAbout_Qt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
     connect(ui->actionShow_info_dock, SIGNAL(toggled(bool)), ui->wptDockWidget, SLOT(setVisible(bool)));
     connect(ui->action_Show_statusbar, SIGNAL(toggled(bool)), ui->statusBar, SLOT(setVisible(bool)));
+    connect(ui->actionSho_w_incline_dock, SIGNAL(toggled(bool)), ui->inclineDock, SLOT(setVisible(bool)));
 
     gpxFile = NULL;
 
@@ -80,11 +82,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //hides the dock that shows waypoint's properties
     ui->wptDockWidget->hide();
+    ui->inclineDock->hide();
 
     //disables menu
     ui->action_Info->setEnabled(false);
     ui->action_Close->setEnabled(false);
 
+
+    ui->inclinePlot->setTitle(tr("Incline graph"));
+    ui->inclinePlot->setAxisAutoScale(0);
+    ui->inclinePlot->setAxisAutoScale(QwtPlot::xBottom);
+    ui->inclinePlot->setAxisTitle(QwtPlot::yLeft,tr("Elevation (m)"));
+    ui->inclinePlot->setAxisTitle(QwtPlot::xBottom,tr("Position (km)"));
+    ui->inclinePlot->replot();
 }
 
 MainWindow::~MainWindow()
@@ -186,7 +196,13 @@ void MainWindow::wheelEvent(QWheelEvent *event)
 void MainWindow::resizeEvent ( QResizeEvent * event )
 {
     //TODO find a better way to find out available space....
-    mc->resize(QSize(event->size().width()-23,event->size().height()-65));
+    int height = 0;
+    if (ui->inclineDock->isVisible())
+        height = ui->inclineDock->height();
+    int width = 0;
+    if (ui->wptDockWidget->isVisible())
+        width = ui->wptDockWidget->height(); //check if it isn't on the side
+    mc->resize(QSize(event->size().width()-23,event->size().height()-65-height));
 }
 
 void MainWindow::on_action_Info_triggered()
@@ -309,6 +325,9 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
 
     int trkCounter = 0;
 
+    QVector<double> x;
+    QVector<double> y;
+
     //needs this to calculate the bounds
     double minLat = -180.0;
     double maxLat = 180.0;
@@ -321,57 +340,70 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
     GpxWptType* previousWpt = NULL;
     double length = 0;
 
-        QListIterator<GpxTrkType*> i(gpxFile->getTrkList());
-        while (i.hasNext())
+    QListIterator<GpxTrkType*> i(gpxFile->getTrkList());
+    while (i.hasNext())
+    {
+        trkCounter++;
+        QList<Point*> points;
+        QListIterator<GpxTrksegType*> j((i.next())->getTrksegType());
+        while (j.hasNext())
         {
-            trkCounter++;
-            QList<Point*> points;
-            QListIterator<GpxTrksegType*> j((i.next())->getTrksegType());
-            while (j.hasNext())
-            {
-                QListIterator<GpxWptType*> k((j.next())->getTrkpt());
-                GpxWptType* currentWpt;
-                while (k.hasNext()) {
-                    //bug() << counter++;
-                    currentWpt = k.next();
-                    if (boundsCalc)
-                    {
-                        if (currentWpt->getLon()->getLongitude() > minLon)
-                            minLon = currentWpt->getLon()->getLongitude();
-                        if (currentWpt->getLon()->getLongitude() < maxLon)
-                            maxLon = currentWpt->getLon()->getLongitude();
-                        if (currentWpt->getLat()->getLatitude() > minLat)
-                            minLat = currentWpt->getLat()->getLatitude();
-                        if (currentWpt->getLat()->getLatitude() < maxLat)
-                            maxLat = currentWpt->getLat()->getLatitude();
-                    }
-
-                    //if (tempWpt == NULL || tempWpt->getLon() == NULL)
-                    //    break;
-                    if (previousWpt != NULL)
-                    {
-                        length += calculateLength(previousWpt, currentWpt);
-                    }
-                    QString wptName = "";
-                    if (!currentWpt->getName().isNull())
-                    {
-                        wptName = currentWpt->getName();
-                    }
-                    points.append(new Point(currentWpt->getLon()->getLongitude(), currentWpt->getLat()->getLatitude(), wptName, Point::BottomLeft));
-                    previousWpt = currentWpt;
+            QListIterator<GpxWptType*> k((j.next())->getTrkpt());
+            GpxWptType* currentWpt;
+            while (k.hasNext()) {
+                //bug() << counter++;
+                currentWpt = k.next();
+                if (boundsCalc)
+                {
+                    if (currentWpt->getLon()->getLongitude() > minLon)
+                        minLon = currentWpt->getLon()->getLongitude();
+                    if (currentWpt->getLon()->getLongitude() < maxLon)
+                        maxLon = currentWpt->getLon()->getLongitude();
+                    if (currentWpt->getLat()->getLatitude() > minLat)
+                        minLat = currentWpt->getLat()->getLatitude();
+                    if (currentWpt->getLat()->getLatitude() < maxLat)
+                        maxLat = currentWpt->getLat()->getLatitude();
                 }
-            }
-            tracks.append(points);
-        }
 
-        qDebug() << "lunghezza percorso " << length;
-        qDebug() << "numero tracce " << trkCounter;
+                y.append(currentWpt->getEle());
+                x.append(length/1000); //transform to km
+
+                //if (tempWpt == NULL || tempWpt->getLon() == NULL)
+                //    break;
+                if (previousWpt != NULL)
+                {
+                    length += calculateLength(previousWpt, currentWpt);
+                }
+                QString wptName = "";
+                if (!currentWpt->getName().isNull())
+                {
+                    wptName = currentWpt->getName();
+                }
+
+
+                points.append(new Point(currentWpt->getLon()->getLongitude(), currentWpt->getLat()->getLatitude(), wptName, Point::BottomLeft));
+                previousWpt = currentWpt;
+            }
+        }
+        tracks.append(points);
+    }
+
+    qDebug() << "lunghezza percorso " << length;
+    qDebug() << "numero tracce " << trkCounter;
 
 
     if (boundsCalc)
     {
         gpxFile->getMetadata()->setBounds(new GpxBoundsType(minLon, maxLon, minLat, maxLat));
     }
+
+    QwtPlotCurve *curve1 = new QwtPlotCurve("Incline graph");
+    curve1->setData(x,y);
+    curve1->setPen(QPen("red"));
+    curve1->attach(ui->inclinePlot);
+    ui->inclinePlot->replot();
+    ui->inclineDock->setVisible(true);
+    update();
 
     return tracks;
 }
@@ -398,79 +430,79 @@ QList<QList<Point*> > MainWindow::prepareRteLine()
     GpxWptType* previousWpt = NULL;
     double length = 0;
 
-        QListIterator<GpxRteType*> i(gpxFile->getRteList());
-        while (i.hasNext())
-        {
-            rteCounter++;
-            QList<Point*> points;
-                QListIterator<GpxWptType*> k((i.next())->getRtept());
-                GpxWptType* currentWpt;
-                while (k.hasNext()) {
+    QListIterator<GpxRteType*> i(gpxFile->getRteList());
+    while (i.hasNext())
+    {
+        rteCounter++;
+        QList<Point*> points;
+        QListIterator<GpxWptType*> k((i.next())->getRtept());
+        GpxWptType* currentWpt;
+        while (k.hasNext()) {
 
-                    currentWpt = k.next();
-                    if (boundsCalc)
-                    {
-                        if (currentWpt->getLon()->getLongitude() > minLon)
-                            minLon = currentWpt->getLon()->getLongitude();
-                        if (currentWpt->getLon()->getLongitude() < maxLon)
-                            maxLon = currentWpt->getLon()->getLongitude();
-                        if (currentWpt->getLat()->getLatitude() > minLat)
-                            minLat = currentWpt->getLat()->getLatitude();
-                        if (currentWpt->getLat()->getLatitude() < maxLat)
-                            maxLat = currentWpt->getLat()->getLatitude();
-                    }
+            currentWpt = k.next();
+            if (boundsCalc)
+            {
+                if (currentWpt->getLon()->getLongitude() > minLon)
+                    minLon = currentWpt->getLon()->getLongitude();
+                if (currentWpt->getLon()->getLongitude() < maxLon)
+                    maxLon = currentWpt->getLon()->getLongitude();
+                if (currentWpt->getLat()->getLatitude() > minLat)
+                    minLat = currentWpt->getLat()->getLatitude();
+                if (currentWpt->getLat()->getLatitude() < maxLat)
+                    maxLat = currentWpt->getLat()->getLatitude();
+            }
 
-                    //if (tempWpt == NULL || tempWpt->getLon() == NULL)
-                    //    break;
-                    if (previousWpt != NULL)
-                    {
-                        length += calculateLength(previousWpt, currentWpt);
-                    }
-                    QString wptCurrentName = "";
-                    if (!currentWpt->getName().isEmpty())
-                    {
-                        wptCurrentName = currentWpt->getName();
-                    }
-                    else
-                    {
-                        wptCurrentName.append("No name");
-                    }
-                    wptCurrentName.append("???");
-                    if (!currentWpt->getTime().isNull())
-                        wptCurrentName.append(currentWpt->getTime().toString());
-                    else
-                    {
-                        wptCurrentName.append("No");
-                    }
-                    wptCurrentName.append("???");
-                    if (currentWpt->getEle() != -10000)
-                        wptCurrentName.append(QString::number(currentWpt->getEle()));
-                    else
-                    {
-                        wptCurrentName.append("0");
-                    }
-                    wptCurrentName.append("???");
-                    if (!currentWpt->getDesc().isEmpty())
-                        wptCurrentName.append(currentWpt->getDesc());
-                    else
-                    {
-                        wptCurrentName.append("No");
-                    }
-                    wptCurrentName.append("???");
-                    if (!currentWpt->getType().isEmpty())
-                        wptCurrentName.append(currentWpt->getType());
-                    else
-                    {
-                        wptCurrentName.append("No");
-                    }
-                    points.append(new ImagePoint(currentWpt->getLon()->getLongitude(), currentWpt->getLat()->getLatitude(), flag, wptCurrentName, Point::BottomLeft));
-                    previousWpt = currentWpt;
-                }
-            routes.append(points);
+            //if (tempWpt == NULL || tempWpt->getLon() == NULL)
+            //    break;
+            if (previousWpt != NULL)
+            {
+                length += calculateLength(previousWpt, currentWpt);
+            }
+            QString wptCurrentName = "";
+            if (!currentWpt->getName().isEmpty())
+            {
+                wptCurrentName = currentWpt->getName();
+            }
+            else
+            {
+                wptCurrentName.append("No name");
+            }
+            wptCurrentName.append("???");
+            if (!currentWpt->getTime().isNull())
+                wptCurrentName.append(currentWpt->getTime().toString());
+            else
+            {
+                wptCurrentName.append("No");
+            }
+            wptCurrentName.append("???");
+            if (currentWpt->getEle() != -10000)
+                wptCurrentName.append(QString::number(currentWpt->getEle()));
+            else
+            {
+                wptCurrentName.append("0");
+            }
+            wptCurrentName.append("???");
+            if (!currentWpt->getDesc().isEmpty())
+                wptCurrentName.append(currentWpt->getDesc());
+            else
+            {
+                wptCurrentName.append("No");
+            }
+            wptCurrentName.append("???");
+            if (!currentWpt->getType().isEmpty())
+                wptCurrentName.append(currentWpt->getType());
+            else
+            {
+                wptCurrentName.append("No");
+            }
+            points.append(new ImagePoint(currentWpt->getLon()->getLongitude(), currentWpt->getLat()->getLatitude(), flag, wptCurrentName, Point::BottomLeft));
+            previousWpt = currentWpt;
         }
+        routes.append(points);
+    }
 
-        qDebug() << "lunghezza percorso " << length;
-        qDebug() << "numero routes " << rteCounter;
+    qDebug() << "lunghezza percorso " << length;
+    qDebug() << "numero routes " << rteCounter;
 
 
     if (boundsCalc)
