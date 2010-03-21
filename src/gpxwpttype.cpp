@@ -179,6 +179,19 @@ FixType GpxWptType::getFix()
     return _fix;
 }
 
+QString GpxWptType::getFixString()
+{
+    switch (_fix)
+    {
+    case NONE: return "None";
+    case FIX2D: return "2D";
+    case FIX3D: return "3D";
+    case DGPS: return "DGPS";
+    case PPS: return "PPS";
+    default: return "None";
+    }
+}
+
 void GpxWptType::setFix (QString fix)
 {
     if (fix == "2d")
@@ -191,5 +204,53 @@ void GpxWptType::setFix (QString fix)
         _fix = DGPS;
     if (fix == "pps")
         _fix = PPS;
+}
+
+double const GpxWptType::getHdop()
+{
+    return _hdop;
+}
+
+bool GpxWptType::setHdop (QString hdop)
+{
+    bool ok;
+    double res;
+    //Because we should interpret always the dot as decimal separator
+    QLocale::setDefault(QLocale::C);
+    res = hdop.toDouble(&ok);
+    _hdop = res;
+    return ok;
+}
+
+double const GpxWptType::getVdop()
+{
+    return _vdop;
+}
+
+bool GpxWptType::setVdop (QString vdop)
+{
+    bool ok;
+    double res;
+    //Because we should interpret always the dot as decimal separator
+    QLocale::setDefault(QLocale::C);
+    res = vdop.toDouble(&ok);
+    _vdop = res;
+    return ok;
+}
+
+double const GpxWptType::getPdop()
+{
+    return _pdop;
+}
+
+bool GpxWptType::setPdop (QString pdop)
+{
+    bool ok;
+    double res;
+    //Because we should interpret always the dot as decimal separator
+    QLocale::setDefault(QLocale::C);
+    res = pdop.toDouble(&ok);
+    _pdop = res;
+    return ok;
 }
 

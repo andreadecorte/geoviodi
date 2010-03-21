@@ -67,7 +67,7 @@
    <addaction name="menu_Help"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QDockWidget" name="wptDockWidget">
+  <widget class="QDockWidget" name="wptDock">
    <property name="enabled">
     <bool>true</bool>
    </property>
@@ -100,7 +100,7 @@
      <item row="0" column="1">
       <widget class="QLabel" name="lbl_Name">
        <property name="text">
-        <string>TextLabel</string>
+        <string/>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -110,7 +110,7 @@
      <item row="1" column="1">
       <widget class="QLabel" name="lbl_Type">
        <property name="text">
-        <string>TextLabel</string>
+        <string/>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -132,7 +132,7 @@
         </size>
        </property>
        <property name="text">
-        <string>TextLabel</string>
+        <string/>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -142,7 +142,7 @@
      <item row="4" column="1">
       <widget class="QLabel" name="lbl_Y">
        <property name="text">
-        <string>TextLabel</string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -194,7 +194,7 @@
      <item row="6" column="1">
       <widget class="QLabel" name="lbl_Ele">
        <property name="text">
-        <string>TextLabel</string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -214,7 +214,7 @@
         </size>
        </property>
        <property name="text">
-        <string>TextLabel</string>
+        <string/>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -250,6 +250,16 @@
          <height>50</height>
         </size>
        </property>
+       <widget class="QwtTextLabel" name="lbl_Length">
+        <property name="geometry">
+         <rect>
+          <x>460</x>
+          <y>50</y>
+          <width>100</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
       </widget>
      </item>
     </layout>
@@ -332,6 +342,11 @@
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QwtTextLabel</class>
+   <extends>QFrame</extends>
+   <header>qwt_text_label.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

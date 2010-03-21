@@ -38,6 +38,7 @@
 #include "gpxwpttype.h"
 #include "gpxtype.h"
 #include "xmlloader.h"
+#include "qwt_plot_curve.h"
 
 #include <QMainWindow>
 #include <QDateTime>
@@ -80,9 +81,13 @@ private:
     QAction* yahooActionOverlay;
     QAction* googleActionMap;
 
+    QwtPlotCurve *inclineCurve;
+
     void addZoomButtons();
+    void clearWptInfo();
 
 private slots:
+    void on_inclineDock_dockLocationChanged(Qt::DockWidgetArea area);
     void on_action_About_triggered();
     void on_action_Close_triggered();
     void on_action_Info_triggered();

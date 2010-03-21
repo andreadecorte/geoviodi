@@ -365,7 +365,18 @@ void XmlLoader::readWpt(GpxWptType* wpt)
     {
         wpt->setGeoidheight(reader.readElementText());
     }
-
+    if (reader.name() == "hdop")
+    {
+        wpt->setHdop(reader.readElementText());
+    }
+    if (reader.name() == "vdop")
+    {
+        wpt->setVdop(reader.readElementText());
+    }
+    if (reader.name() == "pdop")
+    {
+        wpt->setPdop(reader.readElementText());
+    }
 }
 
 void XmlLoader::setFileName(QString fileName)

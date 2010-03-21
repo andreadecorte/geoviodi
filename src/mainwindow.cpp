@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->actionAbout_Qt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-    connect(ui->actionShow_info_dock, SIGNAL(toggled(bool)), ui->wptDockWidget, SLOT(setVisible(bool)));
+    connect(ui->actionShow_info_dock, SIGNAL(toggled(bool)), ui->wptDock, SLOT(setVisible(bool)));
     connect(ui->action_Show_statusbar, SIGNAL(toggled(bool)), ui->statusBar, SLOT(setVisible(bool)));
     connect(ui->actionSho_w_incline_dock, SIGNAL(toggled(bool)), ui->inclineDock, SLOT(setVisible(bool)));
 
@@ -81,7 +81,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->menu_View->addAction(googleActionMap);
 
     //hides the dock that shows waypoint's properties
-    ui->wptDockWidget->hide();
+    ui->wptDock->hide();
     ui->inclineDock->hide();
 
     //disables menu
@@ -89,12 +89,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->action_Close->setEnabled(false);
 
 
+    //draws a basic incline graph which is empty now
     ui->inclinePlot->setTitle(tr("Incline graph"));
     ui->inclinePlot->setAxisAutoScale(0);
-    ui->inclinePlot->setAxisAutoScale(QwtPlot::xBottom);
+    //ui->inclinePlot->setAxisAutoScale(QwtPlot::xBottom);
     ui->inclinePlot->setAxisTitle(QwtPlot::yLeft,tr("Elevation (m)"));
     ui->inclinePlot->setAxisTitle(QwtPlot::xBottom,tr("Position (km)"));
     ui->inclinePlot->replot();
+    inclineCurve = new QwtPlotCurve("Incline graph");
 }
 
 MainWindow::~MainWindow()
@@ -104,6 +106,7 @@ MainWindow::~MainWindow()
     delete mapadapter;
     delete mc;
     delete gpxFile;
+    delete inclineCurve;
 }
 
 void MainWindow::changeEvent(QEvent *e)
@@ -200,8 +203,8 @@ void MainWindow::resizeEvent ( QResizeEvent * event )
     if (ui->inclineDock->isVisible())
         height = ui->inclineDock->height();
     int width = 0;
-    if (ui->wptDockWidget->isVisible())
-        width = ui->wptDockWidget->height(); //check if it isn't on the side
+    if (ui->wptDock->isVisible())
+        width = ui->wptDock->height(); //check if it isn't on the side
     mc->resize(QSize(event->size().width()-23,event->size().height()-65-height));
 }
 
@@ -223,6 +226,16 @@ void MainWindow::on_action_Close_triggered()
     ui->statusBar->clearMessage();
     ui->action_Close->setEnabled(false);
     ui->action_Info->setEnabled(false);
+
+    ui->inclinePlot->hide();
+    ui->inclineDock->hide();
+    ui->inclinePlot->detachItems();
+    ui->wptDock->hide();
+    clearWptInfo();
+    //we need this otherwise the map will be covered by the dock
+    mc->resize (QSize(width(), height()));
+
+
     gpxFile = NULL;
     goToInitialCoordinates();
     mc->showScale(true);
@@ -295,10 +308,12 @@ void MainWindow::mapproviderSelected(QAction* action)
 
 void MainWindow::pointClicked(Geometry *geometry,QPoint)
 {
-    if (ui->wptDockWidget->isHidden())
-        ui->wptDockWidget->show();
-    //bug() << "parent: " << geometry->parentGeometry();
-    //bug() << "Element clicked: " << geometry->name();
+    if (ui->wptDock->isHidden())
+        ui->wptDock->show();
+
+    //we need this otherwise the map will be covered by the dock
+    mc->resize (QSize(mc->width(), mc->height()));
+
     QList< Point  * > list = geometry->points();
     QListIterator<Point*> i(list);
     while (i.hasNext())
@@ -368,8 +383,6 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
                 y.append(currentWpt->getEle());
                 x.append(length/1000); //transform to km
 
-                //if (tempWpt == NULL || tempWpt->getLon() == NULL)
-                //    break;
                 if (previousWpt != NULL)
                 {
                     length += calculateLength(previousWpt, currentWpt);
@@ -397,13 +410,20 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
         gpxFile->getMetadata()->setBounds(new GpxBoundsType(minLon, maxLon, minLat, maxLat));
     }
 
-    QwtPlotCurve *curve1 = new QwtPlotCurve("Incline graph");
-    curve1->setData(x,y);
-    curve1->setPen(QPen("red"));
-    curve1->attach(ui->inclinePlot);
+    //let's draw incline graph
+    inclineCurve = new QwtPlotCurve("Incline graph");
+    inclineCurve->attach(ui->inclinePlot);
+    inclineCurve->setData(x,y);
+    inclineCurve->setPen(QPen("red"));
+    //if we have close a file and the plot is hidden we should show it again
+    if (ui->inclinePlot->isHidden())
+        ui->inclinePlot->setVisible(true);
+    ui->lbl_Length->setText("Length: " + QString::number(length/1000));
     ui->inclinePlot->replot();
     ui->inclineDock->setVisible(true);
-    update();
+
+    //we need this otherwise the map will be covered by the dock
+    mc->resize (QSize(mc->width(), mc->height()));
 
     return tracks;
 }
@@ -661,17 +681,54 @@ void MainWindow::drawMap()
 
         view.append(QPointF(gpxFile->getMetadata()->getBounds()->getMinlon()->getLongitude(), gpxFile->getMetadata()->getBounds()->getMinlat()->getLatitude()));
         view.append(QPointF(gpxFile->getMetadata()->getBounds()->getMaxlon()->getLongitude(), gpxFile->getMetadata()->getBounds()->getMaxlat()->getLatitude()));
-        mc->setViewAndZoomIn(view);
+
+        //issue: if the bounds are too close, the zoom level needed could be too high and we get a loop
+        //as a workaround, I calculate the distance between the two extreme points and set the zoom level
+        //manually if they are too close
+        GpxWptType* point1 = new GpxWptType();
+        point1->setLon(gpxFile->getMetadata()->getBounds()->getMinlon());
+        point1->setLat(gpxFile->getMetadata()->getBounds()->getMinlat());
+        GpxWptType* point2 = new GpxWptType();
+        point2->setLon(gpxFile->getMetadata()->getBounds()->getMaxlon());
+        point2->setLat(gpxFile->getMetadata()->getBounds()->getMaxlat());
+        //40 metres is just a guess
+        if (calculateLength(point1,point2) < 40)
+        {
+            //can't use the view list created previously, it will set a wrong position
+            //I just pass one of the two points, since they are anyway pretty close
+            mc->setView(QPointF(gpxFile->getMetadata()->getBounds()->getMinlon()->getLongitude(), gpxFile->getMetadata()->getBounds()->getMinlat()->getLatitude()));
+            mc->setZoom(17);
+        }
+        else {
+            //just let qmapcontrol do the job
+            mc->setViewAndZoomIn(view);
+        }
     }
     else
     {
         //this shouldn't happen, but just in case...
         goToInitialCoordinates();
     }
-    //readd scale
+    //readd scale so we avoid flickering
     mc->showScale(true);
 
     loadingProgressBar->setValue(100);
     ui->statusBar->removeWidget(loadingProgressBar);
     ui->statusBar->showMessage(xml->getFileName() + " " + tr("loaded"));
+}
+
+void MainWindow::on_inclineDock_dockLocationChanged(Qt::DockWidgetArea area)
+{
+
+}
+
+void MainWindow::clearWptInfo()
+{
+    ui->lbl_Desc->setText("");
+    ui->lbl_Ele->setText("");
+    ui->lbl_Name->setText("");
+    ui->lbl_Type->setText("");
+    ui->lbl_Time->setText("");
+    ui->lbl_X->setText("");
+    ui->lbl_Y->setText("");
 }

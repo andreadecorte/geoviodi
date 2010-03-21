@@ -71,7 +71,14 @@ public:
     void setGeoidheight(double height);
     bool setGeoidheight(QString height);
     FixType getFix();
+    QString getFixString();
     void setFix (QString fix);
+    double const getHdop();
+    bool setHdop (QString hdop);
+    double const getVdop();
+    bool setVdop (QString vdop);
+    double const getPdop();
+    bool setPdop (QString pdop);
 
 private:
     //Elevation (in meters) of the point.
