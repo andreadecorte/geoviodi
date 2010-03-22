@@ -23,6 +23,7 @@
 #define GPXTYPE_H
 #include "gpxwpttype.h"
 #include "gpxtrktype.h"
+#include "gpxtrktypeextended.h"
 #include "gpxmetadatatype.h"
 #include "gpxrtetype.h"
 
@@ -33,8 +34,8 @@ public:
     GpxWptType* getFirstWpt();
     void addWpt (GpxWptType* wpt);
     QList<GpxWptType*> const getWptList();
-    void addTrk (GpxTrkType* trk);
-    QList<GpxTrkType*> const getTrkList();
+    void addTrk (GpxTrkTypeExtended* trk);
+    QList<GpxTrkTypeExtended*> getTrkList();
     QString const getVersion();
     void setVersion (QString version);
     QString const getCreator();
@@ -48,7 +49,7 @@ private:
     GpxMetadataType* _metadata;
     QList<GpxWptType*> _wptList;
     QList<GpxRteType*> _rteList;
-    QList<GpxTrkType*> _trkList;
+    QList<GpxTrkTypeExtended*> _trkList;
     QString _version;
     QString _creator;
 };

@@ -96,7 +96,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->inclinePlot->setAxisTitle(QwtPlot::yLeft,tr("Elevation (m)"));
     ui->inclinePlot->setAxisTitle(QwtPlot::xBottom,tr("Position (km)"));
     ui->inclinePlot->replot();
-    inclineCurve = new QwtPlotCurve("Incline graph");
 }
 
 MainWindow::~MainWindow()
@@ -106,7 +105,6 @@ MainWindow::~MainWindow()
     delete mapadapter;
     delete mc;
     delete gpxFile;
-    delete inclineCurve;
 }
 
 void MainWindow::changeEvent(QEvent *e)
@@ -227,6 +225,8 @@ void MainWindow::on_action_Close_triggered()
     ui->action_Close->setEnabled(false);
     ui->action_Info->setEnabled(false);
 
+    ui->combo_TrkChoose->clear();
+    ui->lbl_Length->setText("");
     ui->inclinePlot->hide();
     ui->inclineDock->hide();
     ui->inclinePlot->detachItems();
@@ -353,20 +353,23 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
         boundsCalc = true;
 
     GpxWptType* previousWpt = NULL;
-    double length = 0;
+    double length;
 
-    QListIterator<GpxTrkType*> i(gpxFile->getTrkList());
+    QListIterator<GpxTrkTypeExtended*> i(gpxFile->getTrkList());
     while (i.hasNext())
     {
+        x = QVector<double>();
+        y = QVector<double>();
+        length = 0;
         trkCounter++;
         QList<Point*> points;
-        QListIterator<GpxTrksegType*> j((i.next())->getTrksegType());
+        GpxTrkTypeExtended* current = i.next();
+        QListIterator<GpxTrksegType*> j(current->getTrksegType());
         while (j.hasNext())
         {
             QListIterator<GpxWptType*> k((j.next())->getTrkpt());
             GpxWptType* currentWpt;
             while (k.hasNext()) {
-                //bug() << counter++;
                 currentWpt = k.next();
                 if (boundsCalc)
                 {
@@ -379,8 +382,9 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
                     if (currentWpt->getLat()->getLatitude() < maxLat)
                         maxLat = currentWpt->getLat()->getLatitude();
                 }
-
-                y.append(currentWpt->getEle());
+                if (currentWpt->getEle() != -10000)
+                    y.append(currentWpt->getEle());
+                else y.append(0.0);
                 x.append(length/1000); //transform to km
 
                 if (previousWpt != NULL)
@@ -399,9 +403,21 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
             }
         }
         tracks.append(points);
+
+        //set the extended properties for the track
+        //we don't need a QMutableListIterator since we won't read this now
+        //besides that, QMutableListIterator doesn't work :D
+        current->setLength(length);
+        current->setColor(trkCounter); //choose a color given the track number
+        current->setX(x);
+        current->setY(y);
+
+        if (!current->getName().isEmpty())
+            ui->combo_TrkChoose->addItem(current->getName());
+        else
+            ui->combo_TrkChoose->addItem(tr("Track") + " " + QString::number(trkCounter));
     }
 
-    qDebug() << "lunghezza percorso " << length;
     qDebug() << "numero tracce " << trkCounter;
 
 
@@ -409,18 +425,6 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
     {
         gpxFile->getMetadata()->setBounds(new GpxBoundsType(minLon, maxLon, minLat, maxLat));
     }
-
-    //let's draw incline graph
-    inclineCurve = new QwtPlotCurve("Incline graph");
-    inclineCurve->attach(ui->inclinePlot);
-    inclineCurve->setData(x,y);
-    inclineCurve->setPen(QPen("red"));
-    //if we have close a file and the plot is hidden we should show it again
-    if (ui->inclinePlot->isHidden())
-        ui->inclinePlot->setVisible(true);
-    ui->lbl_Length->setText("Length: " + QString::number(length/1000));
-    ui->inclinePlot->replot();
-    ui->inclineDock->setVisible(true);
 
     //we need this otherwise the map will be covered by the dock
     mc->resize (QSize(mc->width(), mc->height()));
@@ -577,6 +581,7 @@ void MainWindow::on_action_About_triggered()
   */
 void MainWindow::drawMap()
 {
+    int trkCounter = 0;
     gpxFile = xml->getGpx();
     geom->clearGeometries();
 
@@ -595,12 +600,16 @@ void MainWindow::drawMap()
         while (i.hasNext())
         {
             // A QPen also can use transparency
-            QPen* linepen = new QPen(QColor((rand()%255), 60, 60, 100)); //randomize red value
+            //QPen* linepen = new QPen(QColor((rand()%255), 60, 60, 100)); //randomize red value
+            QPen* linepen = new QPen(gpxFile->getTrkList().at(trkCounter)->getColor());
             linepen->setWidth(7);
             LineString* line = new LineString(i.next(), "", linepen);
             // Add the LineString to the layer
             geom->addGeometry(line);
+            trkCounter++;
         }
+        //draw the graph for the first track, then the user could choose another one
+        drawInclineGraph(0);
     }
 
     connect(geom, SIGNAL(geometryClicked(Geometry*,QPoint)),this,SLOT(pointClicked(Geometry*,QPoint)));
@@ -717,11 +726,6 @@ void MainWindow::drawMap()
     ui->statusBar->showMessage(xml->getFileName() + " " + tr("loaded"));
 }
 
-void MainWindow::on_inclineDock_dockLocationChanged(Qt::DockWidgetArea area)
-{
-
-}
-
 void MainWindow::clearWptInfo()
 {
     ui->lbl_Desc->setText("");
@@ -731,4 +735,34 @@ void MainWindow::clearWptInfo()
     ui->lbl_Time->setText("");
     ui->lbl_X->setText("");
     ui->lbl_Y->setText("");
+}
+
+void MainWindow::on_combo_TrkChoose_currentIndexChanged(int index)
+{
+    //check this otherwise there will be a crash when clearing the combobox
+    if (index == -1)
+        return;
+    ui->lbl_Length->setText(QString::number(gpxFile->getTrkList().at(index)->getLength()) + " " + tr("kilometres"));
+    ui->inclinePlot->detachItems();
+    drawInclineGraph(index);
+}
+
+/**
+  * @brief draws the incline graph
+  * @param index the number of track to draw starting from zero
+  */
+void MainWindow::drawInclineGraph(int index)
+{
+    //let's draw incline graph
+    QwtPlotCurve *inclineCurve = new QwtPlotCurve("Incline graph");
+    inclineCurve->attach(ui->inclinePlot);
+    //get points from the track list
+    inclineCurve->setData(gpxFile->getTrkList().at(index)->getX(),gpxFile->getTrkList().at(index)->getY());
+    //get color saved for the track
+    inclineCurve->setPen(gpxFile->getTrkList().at(index)->getColor());
+    //if we have close a file and the plot is hidden we should show it again
+    if (ui->inclinePlot->isHidden())
+        ui->inclinePlot->setVisible(true);
+    ui->inclinePlot->replot();
+    ui->inclineDock->setVisible(true);
 }

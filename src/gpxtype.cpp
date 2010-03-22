@@ -41,12 +41,12 @@ QList<GpxWptType*> const GpxType::getWptList()
     return _wptList;
 }
 
-void GpxType::addTrk (GpxTrkType* trk)
+void GpxType::addTrk (GpxTrkTypeExtended* trk)
 {
     _trkList.append(trk);
 }
 
-QList<GpxTrkType*> const GpxType::getTrkList()
+QList<GpxTrkTypeExtended*> GpxType::getTrkList()
 {
     return _trkList;
 }

@@ -23,7 +23,7 @@
 #define XMLLOADER_H
 #include "gpxtype.h"
 #include "gpxwpttype.h"
-#include "gpxtrktype.h"
+#include "gpxtrktypeextended.h"
 #include "gpxtrksegtype.h"
 #include "gpxrtetype.h"
 #include <QXmlStreamReader>

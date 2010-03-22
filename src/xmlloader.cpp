@@ -27,7 +27,7 @@ void XmlLoader::run()
 
     GpxType* gpx = new GpxType;
     GpxTrksegType* trkseg;
-    GpxTrkType* trk;
+    GpxTrkTypeExtended* trk;
     QFile file(_fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
         qDebug() << "Error: Cannot read file " << qPrintable(_fileName)
@@ -217,7 +217,7 @@ void XmlLoader::run()
             //let's read a track
             if (reader.name() == "trk")
             {
-                trk = new GpxTrkType;
+                trk = new GpxTrkTypeExtended;
                 reader.readNext();
                 while (!(reader.tokenType() == QXmlStreamReader::EndElement && reader.name() == "trk"))
                 {
