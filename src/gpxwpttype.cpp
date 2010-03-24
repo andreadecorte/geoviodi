@@ -254,3 +254,35 @@ bool GpxWptType::setPdop (QString pdop)
     return ok;
 }
 
+double const GpxWptType::getAgeOfGpsData()
+{
+    return _ageofdgpsdata;
+}
+
+bool GpxWptType::setAgeOfGpsData (QString age)
+{
+    bool ok;
+    double res;
+    //Because we should interpret always the dot as decimal separator
+    QLocale::setDefault(QLocale::C);
+    res = age.toDouble(&ok);
+    _ageofdgpsdata = res;
+    return ok;
+}
+
+uint const GpxWptType::getSat()
+{
+    return _sat;
+}
+
+bool GpxWptType::setSat (QString sat)
+{
+    bool ok;
+    double res;
+    //Because we should interpret always the dot as decimal separator
+    QLocale::setDefault(QLocale::C);
+    res = sat.toInt(&ok);
+    _sat = res;
+    return ok;
+}
+

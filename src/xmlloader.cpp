@@ -332,51 +332,33 @@ void XmlLoader::run()
 void XmlLoader::readWpt(GpxWptType* wpt)
 {
     if (reader.name() == "name")
-    {
         wpt->setName(reader.readElementText());
-    }
     if (reader.name() == "cmt")
-    {
         wpt->setCmt(reader.readElementText());
-    }
     if (reader.name() == "sym")
         wpt->setSym(reader.readElementText());
     if (reader.name() == "time")
-    {
         wpt->setTime(reader.readElementText());
-    }
     if (reader.name() == "ele")
-    {
         wpt->setEle(reader.readElementText());
-    }
     if (reader.name() == "desc")
-    {
         wpt->setDesc(reader.readElementText());
-    }
     if (reader.name() == "type")
-    {
         wpt->setType(reader.readElementText());
-    }
     if (reader.name() == "fix")
-    {
         wpt->setFix(reader.readElementText());
-    }
     if (reader.name() == "geoidheight")
-    {
         wpt->setGeoidheight(reader.readElementText());
-    }
     if (reader.name() == "hdop")
-    {
         wpt->setHdop(reader.readElementText());
-    }
     if (reader.name() == "vdop")
-    {
         wpt->setVdop(reader.readElementText());
-    }
     if (reader.name() == "pdop")
-    {
         wpt->setPdop(reader.readElementText());
-    }
+    if (reader.name() == "sat")
+        wpt->setSat(reader.readElementText());
+    if (reader.name() == "ageofdgpsdata")
+        wpt->setAgeOfGpsData(reader.readElementText());
 }
 
 void XmlLoader::setFileName(QString fileName)

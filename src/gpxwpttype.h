@@ -79,6 +79,10 @@ public:
     bool setVdop (QString vdop);
     double const getPdop();
     bool setPdop (QString pdop);
+    double const getAgeOfGpsData();
+    bool setAgeOfGpsData (QString age);
+    uint const getSat();
+    bool setSat (QString sat);
 
 private:
     //Elevation (in meters) of the point.
@@ -124,7 +128,6 @@ private:
     GpxLatitudeType *_lat;
     //The longitude of the point.  Decimal degrees, WGS84 datum.
     GpxLongitudeType *_lon;
-
 };
 
 #endif // GPXWPTTYPE_H
