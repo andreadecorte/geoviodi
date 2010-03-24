@@ -1,6 +1,7 @@
 # -------------------------------------------------
 # Project created by QtCreator 2010-03-03T16:50:37
 # -------------------------------------------------
+# CONFIG += release
 QT += xml \
     network
 TARGET = GeoViodi
@@ -89,7 +90,8 @@ HEADERS += src/mainwindow.h \
     src/gpxtrktypeextended.h
 FORMS += src/mainwindow.ui \
     src/metadatadialog.ui
-OTHER_FILES += bregoli.gpx
-LIBS += C:\Qt\2010.02.1\qt\lib\libqwt5.a
-INCLUDEPATH += C:\Qt\2010.02.1\qwt-5.2.0\src
+OTHER_FILES += 
+win32:LIBS += C:\Qt\2010.02.1\qt\lib\libqwt5.a
+unix:LIBS += -L/usr/lib/libqwt.so -lqwt
+INCLUDEPATH += C:\Qt\2010.02.1\qwt-5.2.0\src /usr/include/qwt
 DEFINES += QWT_DLL
