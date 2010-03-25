@@ -90,8 +90,11 @@ HEADERS += src/mainwindow.h \
     src/gpxtrktypeextended.h
 FORMS += src/mainwindow.ui \
     src/metadatadialog.ui
-OTHER_FILES += 
+OTHER_FILES += src/img/redflag2.png
 win32:LIBS += C:\Qt\2010.02.1\qt\lib\libqwt5.a
-unix:LIBS += -L/usr/lib/libqwt.so -lqwt
-INCLUDEPATH += C:\Qt\2010.02.1\qwt-5.2.0\src /usr/include/qwt
+unix:LIBS += -L/usr/lib/libqwt.so \
+    -lqwt
+INCLUDEPATH += C:\Qt\2010.02.1\qwt-5.2.0\src \
+    /usr/include/qwt
 DEFINES += QWT_DLL
+RESOURCES += resource.qrc

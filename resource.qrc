@@ -1,0 +1,5 @@
+ <!DOCTYPE RCC><RCC version="1.0">
+ <qresource>
+     <file alias="redflag2.png">src/img/redflag2.png</file>
+ </qresource>
+ </RCC>

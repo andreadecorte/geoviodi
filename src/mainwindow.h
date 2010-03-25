@@ -92,6 +92,8 @@ private slots:
     void on_action_Info_triggered();
     void on_action_Exit_triggered();
     void on_action_Open_triggered();
+    void wptDockVisibility(bool visible);
+    void inclineDockVisibility(bool visible);
 
 public slots:
     void mapproviderSelected(QAction*);

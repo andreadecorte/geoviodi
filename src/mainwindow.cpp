@@ -32,6 +32,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionShow_info_dock, SIGNAL(toggled(bool)), ui->wptDock, SLOT(setVisible(bool)));
     connect(ui->action_Show_statusbar, SIGNAL(toggled(bool)), ui->statusBar, SLOT(setVisible(bool)));
     connect(ui->actionSho_w_incline_dock, SIGNAL(toggled(bool)), ui->inclineDock, SLOT(setVisible(bool)));
+    connect(ui->inclineDock, SIGNAL(visibilityChanged(bool)), this, SLOT(inclineDockVisibility(bool)));
+    connect(ui->wptDock, SIGNAL(visibilityChanged(bool)), this, SLOT(wptDockVisibility(bool)));
 
     gpxFile = NULL;
 
@@ -449,7 +451,7 @@ QList<QList<Point*> > MainWindow::prepareRteLine()
     if (gpxFile->getMetadata()->getBounds() == NULL)
         boundsCalc = true;
 
-    QPixmap* flag = new QPixmap("../src/img/redflag2.png");
+    QPixmap* flag = new QPixmap(":/redflag2.png");
     qDebug() << flag->height();
     GpxWptType* previousWpt = NULL;
     double length = 0;
@@ -765,4 +767,29 @@ void MainWindow::drawInclineGraph(int index)
         ui->inclinePlot->setVisible(true);
     ui->inclinePlot->replot();
     ui->inclineDock->setVisible(true);
+    ui->actionSho_w_incline_dock->setChecked(true);
+}
+
+void MainWindow::wptDockVisibility(bool visible)
+{
+    //updates the menu if the user closes the dock
+    if (!visible)
+    {
+        ui->actionShow_info_dock->setChecked(false);
+    }
+    //I need to do this because otherwise the map control doesn't update its size
+    QMainWindow::resize(this->size().width()+1, this->size().height()+1);
+    QMainWindow::resize(this->size().width()-1, this->size().height()-1);
+}
+
+void MainWindow::inclineDockVisibility(bool visible)
+{
+    if (!visible)
+    {
+        ui->actionSho_w_incline_dock->setChecked(false);
+    }
+
+    //I need to do this because otherwise the map control doesn't update its size
+    QMainWindow::resize(this->size().width()+1, this->size().height()+1);
+    QMainWindow::resize(this->size().width()-1, this->size().height()-1);
 }
