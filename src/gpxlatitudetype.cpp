@@ -47,13 +47,21 @@ void GpxLatitudeType::setLatitude(double lat)
     _latitude = lat;
 }
 
-bool GpxLatitudeType::setLatitude(QString lat)
+/**
+  * @brief overloaded method to parse a string
+  */
+void GpxLatitudeType::setLatitude(QString lat)
 {
     bool ok;
-    double res;
     //Because we should interpret always the dot as decimal separator
-    QLocale::setDefault(QLocale::C);
-    res = lat.toDouble(&ok);
-    _latitude = res;
-    return ok;
+    QLocale c(QLocale::C);
+    double res = c.toDouble(lat, &ok);
+    if (ok)
+    {
+        if (res>90.0 || res < -90.0)
+            qDebug() << "Wrong latitude range" << lat;
+        _latitude = res;
+    }
+    else
+        qDebug() << "Conversion error" + lat;
 }

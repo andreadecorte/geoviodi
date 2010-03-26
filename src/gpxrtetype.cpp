@@ -85,17 +85,19 @@ void GpxRteType::setNumber(uint number)
     _number = number;
 }
 
-bool GpxRteType::setNumber(QString number)
+/**
+  * @brief overloaded method to parse a string
+  */
+void GpxRteType::setNumber(QString number)
 {
     bool ok;
-    double res;
     //Because we should interpret always the dot as decimal separator
-    QLocale::setDefault(QLocale::C);
-    res = number.toDouble(&ok);
-    if (res < 0)
-        qDebug() << "Route number < 0: " << number;
-    _number = res;
-    return ok;
+    QLocale c(QLocale::C);
+    double res = c.toDouble(number, &ok);
+    if (ok)
+        _number = res;
+    else
+        qDebug() << "Conversion error" + number;
 }
 
 QString const GpxRteType::getType()

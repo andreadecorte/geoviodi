@@ -201,6 +201,7 @@ void XmlLoader::run()
                     metadata->setAuthor(author);
             }
 
+            emit progress(5);
             //let's read a waypoint
             if (reader.name() == "wpt")
             {
@@ -214,6 +215,8 @@ void XmlLoader::run()
                 gpx->addWpt(wpt);
                 qDebug() << "Aggiunto punto" << wpt->getName();
             }
+
+            emit progress(20);
             //let's read a track
             if (reader.name() == "trk")
             {
@@ -359,6 +362,8 @@ void XmlLoader::readWpt(GpxWptType* wpt)
         wpt->setSat(reader.readElementText());
     if (reader.name() == "ageofdgpsdata")
         wpt->setAgeOfGpsData(reader.readElementText());
+    if (reader.name() == "dgpsid")
+        wpt->setDgpsid(reader.readElementText());
 }
 
 void XmlLoader::setFileName(QString fileName)

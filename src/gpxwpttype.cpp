@@ -38,17 +38,25 @@ void GpxWptType::setEle(double ele)
     _ele = ele;
 }
 
-bool GpxWptType::setEle(QString ele)
+/**
+  * @brief overloaded method to parse a string
+  */
+void GpxWptType::setEle(QString ele)
 {
     bool ok;
-    double res;
     //Because we should interpret always the dot as decimal separator
-    QLocale::setDefault(QLocale::C);
-    res = ele.toDouble(&ok);
-    if (res < 0)
-        qDebug() << "Elevation < 0: " << ele;
-    _ele = res;
-    return ok;
+    QLocale c(QLocale::C);
+    double res = c.toDouble(ele, &ok);
+    if (ok)
+    {
+        if (res < 0)
+            qDebug() << "Elevation < 0: " << ele;
+        _ele = res;
+    }
+    else
+    {
+        qDebug() << "Conversion error" + ele;
+    }
 }
 
 QString const GpxWptType::getName()
@@ -163,15 +171,19 @@ void GpxWptType::setGeoidheight(double height)
     _geoidheight = height;
 }
 
-bool GpxWptType::setGeoidheight(QString height)
+/**
+  * @brief overloaded method to parse a string
+  */
+void GpxWptType::setGeoidheight(QString height)
 {
     bool ok;
-    double res;
     //Because we should interpret always the dot as decimal separator
-    QLocale::setDefault(QLocale::C);
-    res = height.toDouble(&ok);
-    _geoidheight = res;
-    return ok;
+    QLocale c(QLocale::C);
+    double res = c.toDouble(height, &ok);
+    if (ok)
+        _geoidheight = res;
+    else
+        qDebug() << "Conversion error" + height;
 }
 
 FixType GpxWptType::getFix()
@@ -211,15 +223,19 @@ double const GpxWptType::getHdop()
     return _hdop;
 }
 
-bool GpxWptType::setHdop (QString hdop)
+/**
+  * @brief overloaded method to parse a string
+  */
+void GpxWptType::setHdop (QString hdop)
 {
     bool ok;
-    double res;
     //Because we should interpret always the dot as decimal separator
-    QLocale::setDefault(QLocale::C);
-    res = hdop.toDouble(&ok);
-    _hdop = res;
-    return ok;
+    QLocale c(QLocale::C);
+    double res = c.toDouble(hdop, &ok);
+    if (ok)
+        _hdop = res;
+    else
+        qDebug() << "Conversion error" + hdop;
 }
 
 double const GpxWptType::getVdop()
@@ -227,15 +243,19 @@ double const GpxWptType::getVdop()
     return _vdop;
 }
 
-bool GpxWptType::setVdop (QString vdop)
+/**
+  * @brief overloaded method to parse a string
+  */
+void GpxWptType::setVdop (QString vdop)
 {
     bool ok;
-    double res;
     //Because we should interpret always the dot as decimal separator
-    QLocale::setDefault(QLocale::C);
-    res = vdop.toDouble(&ok);
-    _vdop = res;
-    return ok;
+    QLocale c(QLocale::C);
+    double res = c.toDouble(vdop, &ok);
+    if (ok)
+        _vdop = res;
+    else
+        qDebug() << "Conversion error" + vdop;
 }
 
 double const GpxWptType::getPdop()
@@ -243,15 +263,19 @@ double const GpxWptType::getPdop()
     return _pdop;
 }
 
-bool GpxWptType::setPdop (QString pdop)
+/**
+  * @brief overloaded method to parse a string
+  */
+void GpxWptType::setPdop (QString pdop)
 {
     bool ok;
-    double res;
     //Because we should interpret always the dot as decimal separator
-    QLocale::setDefault(QLocale::C);
-    res = pdop.toDouble(&ok);
-    _pdop = res;
-    return ok;
+    QLocale c(QLocale::C);
+    double res = c.toDouble(pdop, &ok);
+    if (ok)
+        _pdop = res;
+    else
+        qDebug() << "Conversion error" + pdop;
 }
 
 double const GpxWptType::getAgeOfGpsData()
@@ -259,15 +283,19 @@ double const GpxWptType::getAgeOfGpsData()
     return _ageofdgpsdata;
 }
 
-bool GpxWptType::setAgeOfGpsData (QString age)
+/**
+  * @brief overloaded method to parse a string
+  */
+void GpxWptType::setAgeOfGpsData (QString age)
 {
     bool ok;
-    double res;
     //Because we should interpret always the dot as decimal separator
-    QLocale::setDefault(QLocale::C);
-    res = age.toDouble(&ok);
-    _ageofdgpsdata = res;
-    return ok;
+    QLocale c(QLocale::C);
+    double res = c.toDouble(age, &ok);
+    if (ok)
+        _ageofdgpsdata = res;
+    else
+        qDebug() << "Conversion error" + age;
 }
 
 uint const GpxWptType::getSat()
@@ -275,14 +303,41 @@ uint const GpxWptType::getSat()
     return _sat;
 }
 
-bool GpxWptType::setSat (QString sat)
+/**
+  * @brief overloaded method to parse a string
+  */
+void GpxWptType::setSat (QString sat)
 {
     bool ok;
-    double res;
     //Because we should interpret always the dot as decimal separator
-    QLocale::setDefault(QLocale::C);
-    res = sat.toInt(&ok);
-    _sat = res;
-    return ok;
+    QLocale c(QLocale::C);
+    double res = c.toUInt(sat, &ok);
+    if (ok)
+        _sat = res;
+    else
+        qDebug() << "Conversion error" + sat;
 }
 
+uint const GpxWptType::getDgpsid()
+{
+    return _dgpsid;
+}
+
+//it should be a type on its own, but it's just a int limited from 0 to 1023
+void GpxWptType::setDgpsid(QString id)
+{
+    bool ok;
+    //Because we should interpret always the dot as decimal separator
+    QLocale c(QLocale::C);
+    double res = c.toUInt(id, &ok);
+    if (ok)
+    {
+        if (res > 1023)
+            qDebug() << "Invalid differential GPS station" << id;
+        _dgpsid = res;
+    }
+    else
+    {
+        qDebug() << "Conversion error" + id;
+    }
+}

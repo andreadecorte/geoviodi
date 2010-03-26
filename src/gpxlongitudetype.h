@@ -36,7 +36,7 @@ public:
 
     double const getLongitude();
     void setLongitude(double lon);
-    bool setLongitude(QString lon);
+    void setLongitude(QString lon);
 
 private:
     double _longitude;

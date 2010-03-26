@@ -34,7 +34,7 @@ public:
 
     double const getLatitude();
     void setLatitude(double lat);
-    bool setLatitude(QString lat);
+    void setLatitude(QString lat);
 
 private:
     double _latitude;

@@ -48,7 +48,7 @@ public:
     GpxWptType();
     double const getEle();
     void setEle(double ele);
-    bool setEle(QString ele);
+    void setEle(QString ele);
     QString const getName();
     void setName(QString name);
     QString const getCmt();
@@ -69,20 +69,22 @@ public:
     void setType (QString type);
     double const getGeoidheight();
     void setGeoidheight(double height);
-    bool setGeoidheight(QString height);
+    void setGeoidheight(QString height);
     FixType getFix();
     QString getFixString();
     void setFix (QString fix);
     double const getHdop();
-    bool setHdop (QString hdop);
+    void setHdop (QString hdop);
     double const getVdop();
-    bool setVdop (QString vdop);
+    void setVdop (QString vdop);
     double const getPdop();
-    bool setPdop (QString pdop);
+    void setPdop (QString pdop);
     double const getAgeOfGpsData();
-    bool setAgeOfGpsData (QString age);
+    void setAgeOfGpsData (QString age);
     uint const getSat();
-    bool setSat (QString sat);
+    void setSat (QString sat);
+    uint const getDgpsid();
+    void setDgpsid(QString id);
 
 private:
     //Elevation (in meters) of the point.
@@ -122,7 +124,7 @@ private:
     //Number of seconds since last DGPS update.
     double _ageofdgpsdata;
     //ID of DGPS station used in differential correction.
-//    GpxDgpsStationType _dgpsid;
+    uint _dgpsid;
 //    GpxExtensionsType _extensions;
     //The latitude of the point.  Decimal degrees, WGS84 datum.
     GpxLatitudeType *_lat;

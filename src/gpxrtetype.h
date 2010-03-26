@@ -43,7 +43,7 @@ public:
     void setLinks(QList<GpxLinkType*> links);
     uint const getNumber();
     void setNumber(uint number);
-    bool setNumber(QString number);
+    void setNumber(QString number);
     QString const getType();
     void setType(QString type);
     QList<GpxWptType*> getRtept();

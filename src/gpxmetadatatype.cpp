@@ -116,11 +116,11 @@ QHash<QString,QString> const GpxMetadataType::getMetadataList()
         dict.insert("Keywords", _keywords);
     if (_bounds != NULL)
     {
-        dict.insert("Bounds min lat", QString::number(_bounds->getMinlat()->getLatitude()));
+        dict.insert("Bounds min lat", QString::number(_bounds->getMinlat()->getLatitude(), 'f', 8));
         //qDebug() << getBounds()->getMinlat()->getLatitude();
-        dict.insert("Bounds max lat", QString::number(_bounds->getMaxlat()->getLatitude()));
-        dict.insert("Bounds min lon", QString::number(_bounds->getMinlon()->getLongitude()));
-        dict.insert("Bounds max lon", QString::number(_bounds->getMaxlon()->getLongitude()));
+        dict.insert("Bounds max lat", QString::number(_bounds->getMaxlat()->getLatitude(), 'f', 8));
+        dict.insert("Bounds min lon", QString::number(_bounds->getMinlon()->getLongitude(), 'f', 8));
+        dict.insert("Bounds max lon", QString::number(_bounds->getMaxlon()->getLongitude(), 'f', 8));
     }
     if (!_link.isEmpty())
     {

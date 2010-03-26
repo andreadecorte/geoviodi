@@ -98,6 +98,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->inclinePlot->setAxisTitle(QwtPlot::yLeft,tr("Elevation (m)"));
     ui->inclinePlot->setAxisTitle(QwtPlot::xBottom,tr("Position (km)"));
     ui->inclinePlot->replot();
+
+    QLocale c(QLocale::C);
+    double d = c.toDouble("44.48666300");
+    qDebug() << c.toString(d, 'f', 10);
+
 }
 
 MainWindow::~MainWindow()
@@ -123,13 +128,16 @@ void MainWindow::changeEvent(QEvent *e)
 
 void MainWindow::on_action_Open_triggered()
 {
-    loadingProgressBar = new QProgressBar(this);
-    ui->statusBar->addWidget(loadingProgressBar);
-    if (gpxFile != NULL)
-        on_action_Close_triggered();
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open GPX file"), "", tr("Gpx files (*.gpx)"));
     if (fileName.isEmpty())
         return;
+
+    //shows a progress bar in the status bar
+    loadingProgressBar = new QProgressBar(this);
+    ui->statusBar->addWidget(loadingProgressBar);
+    //closes the current open file if there is one
+    if (gpxFile != NULL)
+        on_action_Close_triggered(true);
 
     //launch a new thread which loads file contents
     xml = new XmlLoader;
@@ -145,11 +153,6 @@ void MainWindow::on_action_Open_triggered()
 
 void MainWindow::on_action_Exit_triggered()
 {    
-    /*QLocale c(QLocale::C);
-    QLocale::setDefault(QLocale::Irish);
-
-    bug() << c.toDouble(("44.48934600"));
-    bug() << QString::number(44.48934600,'g',8);*/
     QCoreApplication::exit(0);
 }
 
@@ -216,7 +219,7 @@ void MainWindow::on_action_Info_triggered()
     metadataDiag->show();
 }
 
-void MainWindow::on_action_Close_triggered()
+void MainWindow::on_action_Close_triggered(bool newFileToOpen)
 {
     if (gpxFile == NULL)
         return;
@@ -237,9 +240,12 @@ void MainWindow::on_action_Close_triggered()
     //we need this otherwise the map will be covered by the dock
     mc->resize (QSize(width(), height()));
 
-
     gpxFile = NULL;
-    goToInitialCoordinates();
+
+    //we need to go to the initial point only if we don't want to open another file
+    //otherwise we'll just go there
+    if (!newFileToOpen)
+        goToInitialCoordinates();
     mc->showScale(true);
     return;
 }
@@ -300,7 +306,7 @@ void MainWindow::mapproviderSelected(QAction* action)
     {
         int zoom = mapadapter->adaptedZoom();
         mc->setZoom(0);
-        mapadapter = new GoogleSatMapAdapter();
+        mapadapter = new GoogleMapAdapter();
         l->setMapAdapter(mapadapter);
         geom->setMapAdapter(mapadapter);
         mc->updateRequestNew();
@@ -326,8 +332,9 @@ void MainWindow::pointClicked(Geometry *geometry,QPoint)
         QStringList list = current->name().split("???");
         ui->lbl_Name->setText(list.at(0));
         ui->lbl_Type->setText(geometry->GeometryType);
-        ui->lbl_X->setText(QString::number(current->longitude()));
-        ui->lbl_Y->setText(QString::number(current->latitude()));
+        //set the precision, the default is low
+        ui->lbl_X->setText(QLocale().toString(current->longitude(), 'g', 6));
+        ui->lbl_Y->setText(QLocale().toString(current->latitude(), 'g', 6));
         ui->lbl_Time->setText(list.at(1));
         ui->lbl_Ele->setText(list.at(2) + " m");
         ui->lbl_Desc->setText(list.at(3));
@@ -452,7 +459,6 @@ QList<QList<Point*> > MainWindow::prepareRteLine()
         boundsCalc = true;
 
     QPixmap* flag = new QPixmap(":/redflag2.png");
-    qDebug() << flag->height();
     GpxWptType* previousWpt = NULL;
     double length = 0;
 
@@ -478,8 +484,6 @@ QList<QList<Point*> > MainWindow::prepareRteLine()
                     maxLat = currentWpt->getLat()->getLatitude();
             }
 
-            //if (tempWpt == NULL || tempWpt->getLon() == NULL)
-            //    break;
             if (previousWpt != NULL)
             {
                 length += calculateLength(previousWpt, currentWpt);
@@ -502,7 +506,7 @@ QList<QList<Point*> > MainWindow::prepareRteLine()
             }
             wptCurrentName.append("???");
             if (currentWpt->getEle() != -10000)
-                wptCurrentName.append(QString::number(currentWpt->getEle()));
+                wptCurrentName.append(QLocale().toString(currentWpt->getEle()));
             else
             {
                 wptCurrentName.append("0");
@@ -529,7 +533,6 @@ QList<QList<Point*> > MainWindow::prepareRteLine()
 
     qDebug() << "lunghezza percorso " << length;
     qDebug() << "numero routes " << rteCounter;
-
 
     if (boundsCalc)
     {
@@ -639,7 +642,7 @@ void MainWindow::drawMap()
         }
         wptCurrentName.append("???");
         if (current->getEle() != -10000)
-            wptCurrentName.append(QString::number(current->getEle()));
+            wptCurrentName.append(QLocale().toString(current->getEle())); //QLocale ensures we use the system's locale
         else
         {
             wptCurrentName.append("0");
@@ -714,6 +717,9 @@ void MainWindow::drawMap()
             //just let qmapcontrol do the job
             mc->setViewAndZoomIn(view);
         }
+
+        delete point1;
+        delete point2;
     }
     else
     {
@@ -744,7 +750,7 @@ void MainWindow::on_combo_TrkChoose_currentIndexChanged(int index)
     //check this otherwise there will be a crash when clearing the combobox
     if (index == -1)
         return;
-    ui->lbl_Length->setText(QString::number(gpxFile->getTrkList().at(index)->getLength()) + " " + tr("kilometres"));
+    ui->lbl_Length->setText((QLocale().toString(gpxFile->getTrkList().at(index)->getLength())) + " " + tr("kilometres"));
     ui->inclinePlot->detachItems();
     drawInclineGraph(index);
 }

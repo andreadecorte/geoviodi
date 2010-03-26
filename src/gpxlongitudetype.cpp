@@ -43,18 +43,26 @@ double const GpxLongitudeType::getLongitude()
 
 void GpxLongitudeType::setLongitude(double lon)
 {
-    if (lon>180.0 || lon < -180.0)
+    if (lon > 180.0 || lon < -180.0)
         qDebug() << "Wrong longitude range" << lon;
     _longitude = lon;
 }
 
-bool GpxLongitudeType::setLongitude(QString lon)
+/**
+  * @brief overloaded method to parse a string
+  */
+void GpxLongitudeType::setLongitude(QString lon)
 {
     bool ok;
-    double res;
     //Because we should interpret always the dot as decimal separator
-    QLocale::setDefault(QLocale::C);
-    res = lon.toDouble(&ok);
-    _longitude = res;
-    return ok;
+    QLocale c(QLocale::C);
+    double res = c.toDouble(lon, &ok);
+    if (ok)
+    {
+        if (res > 180.0 || res < -180.0)
+            qDebug() << "Wrong longitude range" << lon;
+        _longitude = res;
+    }
+    else
+        qDebug() << "Conversion error" + lon;
 }

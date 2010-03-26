@@ -27,7 +27,7 @@
 #include "QMapControl/maplayer.h"
 #include "QMapControl/osmmapadapter.h"
 #include "QMapControl/yahoomapadapter.h"
-#include "QMapControl/googlesatmapadapter.h"
+#include "QMapControl/googlemapadapter.h"
 #include "QMapControl/circlepoint.h"
 #include "QMapControl/imagepoint.h"
 #include "QMapControl/linestring.h"
@@ -88,7 +88,7 @@ private:
 private slots:
     void on_combo_TrkChoose_currentIndexChanged(int index);
     void on_action_About_triggered();
-    void on_action_Close_triggered();
+    void on_action_Close_triggered(bool newFileToOpen);
     void on_action_Info_triggered();
     void on_action_Exit_triggered();
     void on_action_Open_triggered();
