@@ -61,6 +61,8 @@
     <addaction name="actionShow_info_dock"/>
     <addaction name="actionSho_w_incline_dock"/>
     <addaction name="separator"/>
+    <addaction name="actionShow_mar_ker"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_View"/>
@@ -352,6 +354,23 @@
    </property>
    <property name="text">
     <string>Sho&amp;w incline dock</string>
+   </property>
+  </action>
+  <action name="actionShow_mar_ker">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show mar&amp;ker</string>
+   </property>
+   <property name="toolTip">
+    <string>Show path's marker on the map</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
    </property>
   </action>
  </widget>

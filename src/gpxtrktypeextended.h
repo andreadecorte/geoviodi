@@ -42,7 +42,7 @@ public:
     QVector<double> getY();
     void setY(QVector<double> y);
 private:
-    //track length
+    //track length in meters
     double _length;
     //color assigned to the track
     QColor _color;

@@ -90,7 +90,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->action_Info->setEnabled(false);
     ui->action_Close->setEnabled(false);
 
-
     //draws a basic incline graph which is empty now
     ui->inclinePlot->setTitle(tr("Incline graph"));
     ui->inclinePlot->setAxisAutoScale(0);
@@ -99,10 +98,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->inclinePlot->setAxisTitle(QwtPlot::xBottom,tr("Position (km)"));
     ui->inclinePlot->replot();
 
-    QLocale c(QLocale::C);
-    double d = c.toDouble("44.48666300");
-    qDebug() << c.toString(d, 'f', 10);
-
+    //disable since there isn't a file loaded
+    ui->actionShow_mar_ker->setEnabled(false);
+    connect(ui->actionShow_mar_ker, SIGNAL(toggled(bool)), geom, SLOT(setVisible(bool)));
 }
 
 MainWindow::~MainWindow()
@@ -219,6 +217,10 @@ void MainWindow::on_action_Info_triggered()
     metadataDiag->show();
 }
 
+/**
+  * @brief called when closing an opened file
+  * @param newFileToOpen true if we're going to open another file, false otherwise
+  */
 void MainWindow::on_action_Close_triggered(bool newFileToOpen)
 {
     if (gpxFile == NULL)
@@ -229,6 +231,7 @@ void MainWindow::on_action_Close_triggered(bool newFileToOpen)
     ui->statusBar->clearMessage();
     ui->action_Close->setEnabled(false);
     ui->action_Info->setEnabled(false);
+    ui->actionShow_mar_ker->setEnabled(false);
 
     ui->combo_TrkChoose->clear();
     ui->lbl_Length->setText("");
@@ -363,6 +366,7 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
 
     GpxWptType* previousWpt = NULL;
     double length;
+    double totalIncline; //track's total elevation
 
     QListIterator<GpxTrkTypeExtended*> i(gpxFile->getTrkList());
     while (i.hasNext())
@@ -370,6 +374,7 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
         x = QVector<double>();
         y = QVector<double>();
         length = 0;
+        totalIncline = 0;
         trkCounter++;
         QList<Point*> points;
         GpxTrkTypeExtended* current = i.next();
@@ -399,13 +404,16 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
                 if (previousWpt != NULL)
                 {
                     length += calculateLength(previousWpt, currentWpt);
+                    if (currentWpt->getEle() > previousWpt->getEle())
+                    {
+                        totalIncline += (currentWpt->getEle() - previousWpt->getEle());
+                    }
                 }
                 QString wptName = "";
                 if (!currentWpt->getName().isNull())
                 {
                     wptName = currentWpt->getName();
                 }
-
 
                 points.append(new Point(currentWpt->getLon()->getLongitude(), currentWpt->getLat()->getLatitude(), wptName, Point::BottomLeft));
                 previousWpt = currentWpt;
@@ -420,15 +428,13 @@ QList<QList<Point*> > MainWindow::prepareTrkLine()
         current->setColor(trkCounter); //choose a color given the track number
         current->setX(x);
         current->setY(y);
+        qDebug() << totalIncline;
 
         if (!current->getName().isEmpty())
             ui->combo_TrkChoose->addItem(current->getName());
         else
             ui->combo_TrkChoose->addItem(tr("Track") + " " + QString::number(trkCounter));
     }
-
-    qDebug() << "numero tracce " << trkCounter;
-
 
     if (boundsCalc)
     {
@@ -458,6 +464,7 @@ QList<QList<Point*> > MainWindow::prepareRteLine()
     if (gpxFile->getMetadata()->getBounds() == NULL)
         boundsCalc = true;
 
+    //every route point is identified by a flag
     QPixmap* flag = new QPixmap(":/redflag2.png");
     GpxWptType* previousWpt = NULL;
     double length = 0;
@@ -685,6 +692,7 @@ void MainWindow::drawMap()
     //let's enable the menus
     ui->action_Info->setEnabled(true);
     ui->action_Close->setEnabled(true);
+    ui->actionShow_mar_ker->setEnabled(true);
     loadingProgressBar->setValue(85);
 
     QList<QPointF> view;
@@ -745,13 +753,20 @@ void MainWindow::clearWptInfo()
     ui->lbl_Y->setText("");
 }
 
+/**
+  * @brief this is called when selecting a different value in the incline combo box
+  */
 void MainWindow::on_combo_TrkChoose_currentIndexChanged(int index)
 {
     //check this otherwise there will be a crash when clearing the combobox
     if (index == -1)
         return;
-    ui->lbl_Length->setText((QLocale().toString(gpxFile->getTrkList().at(index)->getLength())) + " " + tr("kilometres"));
+    //removes previous graphs
     ui->inclinePlot->detachItems();
+
+    //set track length
+    ui->lbl_Length->setText((QLocale().toString(gpxFile->getTrkList().at(index)->getLength()/1000)) + " " + tr("kilometres"));
+    //draw track's graph
     drawInclineGraph(index);
 }
 
@@ -784,6 +799,7 @@ void MainWindow::wptDockVisibility(bool visible)
         ui->actionShow_info_dock->setChecked(false);
     }
     //I need to do this because otherwise the map control doesn't update its size
+    //ugly hack, TODO find something better
     QMainWindow::resize(this->size().width()+1, this->size().height()+1);
     QMainWindow::resize(this->size().width()-1, this->size().height()-1);
 }
@@ -796,6 +812,7 @@ void MainWindow::inclineDockVisibility(bool visible)
     }
 
     //I need to do this because otherwise the map control doesn't update its size
+    //ugly hack, TODO find something better
     QMainWindow::resize(this->size().width()+1, this->size().height()+1);
     QMainWindow::resize(this->size().width()-1, this->size().height()-1);
 }
